@@ -67,3 +67,18 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+build/
+.qtcreator/
+*.pro.user
+*.pro.user.*
+*.qmlc
+*.jsc
+Makefile*
+*-build-*/
+moc_*.cpp
+moc_*.h
+ui_*.h
+qrc_*.cpp
+*.exe
+.vs/
+*.suo
