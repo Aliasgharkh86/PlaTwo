@@ -9,14 +9,24 @@ CONFIG += c++17
 SOURCES += \
     core/authmanager.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    ui/loginwindow.cpp \
+    ui/signupwindow.cpp \
+    ui/recoverywindow.cpp
 
 HEADERS += \
     core/authmanager.h \
-    mainwindow.h
+    mainwindow.h \
+    ui/loginwindow.h \
+    ui/signupwindow.h \
+    ui/recoverywindow.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    ui/loginwindow.ui \
+    ui/signupwindow.ui \
+    ui/recoverywindow.ui
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
