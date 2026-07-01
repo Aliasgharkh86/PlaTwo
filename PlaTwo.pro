@@ -8,12 +8,16 @@ CONFIG += c++17
 
 SOURCES += \
     core/authmanager.cpp \
+    core/storagemanager.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    ui/loginwindow.cpp
 
 HEADERS += \
     core/authmanager.h \
-    mainwindow.h
+    core/storagemanager.h \
+    mainwindow.h \
+    models/user.h
 
 FORMS += \
     mainwindow.ui
