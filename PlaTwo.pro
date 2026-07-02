@@ -6,37 +6,28 @@ CONFIG += c++17
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+HEADERS += \
+    core/authmanager.h \
+    core/storagemanager.h \
+    models/user.h \
+    ui/loginwindow.h \
+    ui/mainmenuwindow.h \
+    ui/recoverywindow.h \
+    ui/signupwindow.h
+
 SOURCES += \
     core/authmanager.cpp \
     core/storagemanager.cpp \
     main.cpp \
-    mainwindow.cpp \
-<<<<<<< HEAD
-    ui/loginwindow.cpp
-
-HEADERS += \
-    core/authmanager.h \
-    core/storagemanager.h \
-    mainwindow.h \
-    models/user.h
-=======
     ui/loginwindow.cpp \
-    ui/signupwindow.cpp \
-    ui/recoverywindow.cpp
-
-HEADERS += \
-    core/authmanager.h \
-    mainwindow.h \
-    ui/loginwindow.h \
-    ui/signupwindow.h \
-    ui/recoverywindow.h
->>>>>>> ddb5dbe5f15c3ce900079096e5f7dc06cf9a6142
+    ui/mainmenuwindow.cpp \
+    ui/recoverywindow.cpp \
+    ui/signupwindow.cpp
 
 FORMS += \
-    mainwindow.ui \
     ui/loginwindow.ui \
-    ui/signupwindow.ui \
-    ui/recoverywindow.ui
+    ui/recoverywindow.ui \
+    ui/signupwindow.ui
 
 
 # Default rules for deployment.
