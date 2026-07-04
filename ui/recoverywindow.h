@@ -15,6 +15,9 @@ public:
     explicit RecoveryWindow(QWidget *parent = nullptr);
     ~RecoveryWindow();
 
+private slots:
+    void on_backToLoginButton_clicked();
+
 private:
     Ui::RecoveryWindow *ui;
 };

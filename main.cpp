@@ -12,14 +12,14 @@ int main(int argc, char *argv[])
     LoginWindow login;
     login.show();
 
-    SignUpWindow signup;
-    signup.show();
+    // SignUpWindow signup;
+    // signup.show();
 
-    RecoveryWindow recover;
-    recover.show();
+    // RecoveryWindow recover;
+    // recover.show();
 
-    MainWindow w;
-    w.show();
+    // MainWindow w;
+    // w.show();
 
     return a.exec();
 }
