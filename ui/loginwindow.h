@@ -20,6 +20,8 @@ private slots:
 
     void on_recoveryButton_clicked();
 
+    void on_loginButton_clicked();
+
 private:
     Ui::LoginWindow *ui;
 };
