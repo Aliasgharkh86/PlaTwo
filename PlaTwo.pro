@@ -1,4 +1,4 @@
-QT += widgets
+QT += widgets gui sql
 
 CONFIG += c++17
 
@@ -26,6 +26,7 @@ SOURCES += \
 
 FORMS += \
     ui/loginwindow.ui \
+    ui/mainmenuwindow.ui \
     ui/recoverywindow.ui \
     ui/signupwindow.ui
 
