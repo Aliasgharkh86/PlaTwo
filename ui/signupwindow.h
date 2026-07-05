@@ -12,11 +12,18 @@ class SignUpWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit SignUpWindow(QWidget *parent = nullptr);
+    explicit SignUpWindow(QDialog* parent = nullptr);
     ~SignUpWindow();
 
+signals:
+    void signUpSuccess();
+    void switchToLogin();
+
+private slots:
+    void onSignupClicked();
+
 private:
-    Ui::SignUpWindow *ui;
+    Ui::SignUpWindow* ui;
 };
 
-#endif // SIGNUPWINDOW_H
+#endif
