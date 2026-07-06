@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainMenuWindow</class>
+ <widget class="QDialog" name="MainMenuWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>420</width>
+    <height>520</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>PlaTwo - منوی اصلی</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+QWidget {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    font-family: 'Segoe UI';
+    font-size: 13px;
+}
+QLabel#titleLabel {
+    color: #cba6f7;
+    font-size: 24px;
+    font-weight: bold;
+}
+QLabel#welcomeLabel {
+    color: #a6adc8;
+    font-size: 12px;
+}
+QPushButton#dotsBtn {
+    background-color: #313244;
+    border: 2px solid #89b4fa;
+    border-radius: 12px;
+    color: #89b4fa;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 14px;
+    min-height: 24px;
+    text-align: left;
+}
+QPushButton#dotsBtn:hover {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+}
+QPushButton#morrisBtn {
+    background-color: #313244;
+    border: 2px solid #a6e3a1;
+    border-radius: 12px;
+    color: #a6e3a1;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 14px;
+    min-height: 24px;
+    text-align: left;
+}
+QPushButton#morrisBtn:hover {
+    background-color: #a6e3a1;
+    color: #1e1e2e;
+}
+QPushButton#fanoronaBtn {
+    background-color: #313244;
+    border: 2px solid #fab387;
+    border-radius: 12px;
+    color: #fab387;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 14px;
+    min-height: 24px;
+    text-align: left;
+}
+QPushButton#fanoronaBtn:hover {
+    background-color: #fab387;
+    color: #1e1e2e;
+}
+QPushButton#editBtn {
+    background-color: #313244;
+    border: 1px solid #45475a;
+    border-radius: 10px;
+    color: #cdd6f4;
+    font-size: 13px;
+    padding: 10px;
+    min-height: 20px;
+}
+QPushButton#editBtn:hover {
+    border-color: #cba6f7;
+    color: #cba6f7;
+}
+QPushButton#exitBtn {
+    background-color: transparent;
+    border: 1px solid #f38ba8;
+    border-radius: 10px;
+    color: #f38ba8;
+    font-size: 13px;
+    padding: 10px;
+    min-height: 20px;
+}
+QPushButton#exitBtn:hover {
+    background-color: #f38ba8;
+    color: #1e1e2e;
+}
+   </string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>20</y>
+     <width>340</width>
+     <height>480</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>14</number>
+    </property>
+    <item>
+     <widget class="QLabel" name="titleLabel">
+      <property name="text">
+       <string>🎲 PlaTwo</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="welcomeLabel">
+      <property name="text">
+       <string>خوش آمدید</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="topSpacer">
+      <property name="orientation">
+       <enum>Qt::Orientation::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>10</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="dotsBtn">
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="text">
+       <string>🔵  Dots and Boxes</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="morrisBtn">
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="text">
+       <string>♟  Nine Men's Morris</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="fanoronaBtn">
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="text">
+       <string>⭕  Fanorona</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="midSpacer">
+      <property name="orientation">
+       <enum>Qt::Orientation::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>10</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="editBtn">
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="text">
+       <string>✏️  ویرایش اطلاعات کاربری</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="exitBtn">
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="text">
+       <string>خروج</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

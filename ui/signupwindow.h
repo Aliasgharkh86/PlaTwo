@@ -1,7 +1,8 @@
 #ifndef SIGNUPWINDOW_H
 #define SIGNUPWINDOW_H
-
 #include <QDialog>
+#include <QWidget>
+#include <QPushButton>
 
 namespace Ui {
 class SignUpWindow;
@@ -12,22 +13,15 @@ class SignUpWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit SignUpWindow(QDialog* parent = nullptr);
+    explicit SignUpWindow(QWidget* parent = nullptr);
     ~SignUpWindow();
 
-<<<<<<< HEAD
 signals:
-    void signUpSuccess();
     void switchToLogin();
-
+        void signUpSuccess();   // ← اضافه کن
 private slots:
-    void onSignupClicked();
-=======
-private slots:
-    void on_backToLoginButton_clicked();
-
-    void on_pushButton_clicked();
->>>>>>> 2e07b7b58785751398bd5f4b321672e593d92e14
+    void on_pushButton_clicked();       // دکمه ثبت‌نام
+    void on_backToLoginButton_clicked(); // دکمه بازگشت
 
 private:
     Ui::SignUpWindow* ui;

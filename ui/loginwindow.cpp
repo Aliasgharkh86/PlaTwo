@@ -10,12 +10,19 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDir>
-
-LoginWindow::LoginWindow(QWidget *parent)
-    : QWidget(parent)
+#include "core/authmanager.h"
+#
+LoginWindow::LoginWindow(QDialog *parent)
+    : QDialog(parent)
     , ui(new Ui::LoginWindow)
 {
     ui->setupUi(this);
+    connect(ui->signupBtn, &QPushButton::clicked,
+            this, &LoginWindow::switchToSignup);
+    connect(ui->loginBtn, &QPushButton::clicked,
+            this, &LoginWindow::on_loginButton_clicked);
+    connect(ui->recoveryBtn, &QPushButton::clicked,
+            this, &LoginWindow::switchToRecovery);
 }
 
 LoginWindow::~LoginWindow()
@@ -38,54 +45,23 @@ void LoginWindow::on_recoveryButton_clicked()
 }
 
 void LoginWindow::on_loginButton_clicked(){
-        QString username = ui->usernameLineEdit->text();
-        QString password = ui->passwordLineEdit->text();
+    ui->errorLabel->setText("");
 
-        if(username.isEmpty() || password.isEmpty()) {
-            QMessageBox::warning(this, "Error", "Please enter both username and password.");
-            return;
-        }
+    QString err;
+    User u = AuthManager::instance().login(
+        ui->usernameLineEdit->text(),
+        ui->passwordLineEdit->text(),
+        err
+        );
 
-        QByteArray passwordBytes = password.toUtf8();
-        QByteArray hashedBytes = QCryptographicHash::hash(passwordBytes, QCryptographicHash::Sha256);
-        QString hashedPassword = QString(hashedBytes.toHex());
+    // به جای u.isValid، بررسی می‌کنیم که آیا متغیر ارور متنی دارد یا خیر
+    if (!err.isEmpty()) {
+        ui->errorLabel->setText("⚠️ " + err);
+        return;
+    }
 
-        QString filePath = QDir::currentPath() + "/users.json";
-        QFile file(filePath);
-
-        if (!file.exists()) {
-            QMessageBox::warning(this, "Error", "No users found. Please sign up first.");
-            return;
-        }
-
-        if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this, "Error", "Could not open database file.");
-            return;
-        }
-
-        QByteArray fileData = file.readAll();
-        file.close();
-
-        QJsonDocument doc = QJsonDocument::fromJson(fileData);
-        QJsonArray usersArray = doc.array();
-
-        bool loginSuccessful = false;
-
-        for (int i = 0; i < usersArray.size(); ++i) {
-            QJsonObject userObj = usersArray[i].toObject();
-
-            if (userObj["Username"].toString() == username && userObj["Password"].toString() == hashedPassword) {
-                loginSuccessful = true;
-                break;
-            }
-        }
-
-        if (loginSuccessful) {
-            QMessageBox::information(this, "Success", "Login Successful!");
-
-        } else {
-            QMessageBox::warning(this, "Login Failed", "Invalid username or password.");
-        }
+    // اگر متغیر ارور خالی باشد، یعنی لاگین صد در صد موفق بوده است
+    emit loginSuccess(u);
 }
 
 

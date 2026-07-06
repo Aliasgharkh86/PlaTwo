@@ -6,8 +6,15 @@
 
 class AuthManager
 {
+private:
+    QString hashPassword(const QString& plain);
 public:
     static AuthManager& instance();
+
+
+    User login(const QString& usernameOrPhone,
+               const QString& password,
+               QString& outError);
 
     bool signUp(const QString& name,
                 const QString& username,

@@ -11,6 +11,7 @@ HEADERS += \
     core/storagemanager.h \
     models/user.h \
     ui/loginwindow.h \
+    # ui/mainmenuwindow.h \
     ui/mainmenuwindow.h \
     ui/recoverywindow.h \
     ui/signupwindow.h
@@ -20,12 +21,14 @@ SOURCES += \
     core/storagemanager.cpp \
     main.cpp \
     ui/loginwindow.cpp \
+    # ui/mainmenuwindow.cpp \
     ui/mainmenuwindow.cpp \
     ui/recoverywindow.cpp \
     ui/signupwindow.cpp
 
 FORMS += \
     ui/loginwindow.ui \
+    ui/mainmenuwindow.ui \
     ui/recoverywindow.ui \
     ui/signupwindow.ui
 
