@@ -1,0 +1,4 @@
+#ifndef GAMEMESSAGE_H
+#define GAMEMESSAGE_H
+
+#endif // GAMEMESSAGE_H
