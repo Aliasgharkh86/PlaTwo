@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>420</width>
-    <height>500</height>
+    <height>560</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,40 +21,26 @@ QWidget {
     font-family: 'Segoe UI';
     font-size: 13px;
 }
-QLabel#titleLabel {
-    color: #a6e3a1;
-    font-size: 22px;
-    font-weight: bold;
-}
-QLabel#descLabel {
-    color: #a6adc8;
-    font-size: 11px;
-}
-QLabel#errorLabel {
-    color: #f38ba8;
-    font-size: 11px;
-}
+QLabel#titleLabel { color: #a6e3a1; font-size: 22px; font-weight: bold; }
+QLabel#descLabel { color: #a6adc8; font-size: 11px; }
+QLabel#errorLabel { color: #f38ba8; font-size: 11px; }
+
 QLineEdit {
     background-color: #313244;
     border: 2px solid #45475a;
     border-radius: 10px;
     padding: 10px 14px;
     color: #cdd6f4;
-    font-size: 13px;
-    min-height: 20px;
 }
-QLineEdit:focus {
-    border-color: #a6e3a1;
-}
+QLineEdit:focus { border-color: #a6e3a1; }
+
 QPushButton#pushButton {
     background-color: #a6e3a1;
     color: #1e1e2e;
     border: none;
     border-radius: 10px;
-    font-size: 14px;
     font-weight: bold;
     padding: 12px;
-    min-height: 20px;
 }
 QPushButton#pushButton:hover {
     background-color: #94e2d5;
@@ -62,128 +48,61 @@ QPushButton#pushButton:hover {
 QPushButton#pushButton:pressed {
     background-color: #89dceb;
 }
-QPushButton#backToLoginButton {
+
+QPushButton#loginBtn {
     color: #89b4fa;
     border: none;
     background: transparent;
-    font-size: 11px;
     text-decoration: underline;
 }
-QPushButton#backToLoginButton:hover {
+QPushButton#loginBtn:hover {
     color: #cba6f7;
 }
    </string>
   </property>
-  <widget class="QWidget" name="centralWidget">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>20</y>
-     <width>340</width>
-     <height>460</height>
-    </rect>
-   </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="spacing">
-     <number>12</number>
-    </property>
-    <item>
-     <widget class="QLabel" name="titleLabel">
-      <property name="text">
-       <string>ثبت‌نام 🎲</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="descLabel">
-      <property name="text">
-       <string>یک حساب کاربری جدید بسازید</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="nameLineEdit">
-      <property name="placeholderText">
-       <string>نام و نام خانوادگی</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="usernameLineEdit">
-      <property name="placeholderText">
-       <string>نام کاربری</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="phoneLineEdit">
-      <property name="placeholderText">
-       <string>شماره تلفن (09...)</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="emailLineEdit">
-      <property name="placeholderText">
-       <string>آدرس ایمیل</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="passwordLineEdit">
-      <property name="echoMode">
-       <enum>QLineEdit::EchoMode::Password</enum>
-      </property>
-      <property name="placeholderText">
-       <string>رمز عبور (حداقل ۸ کاراکتر + عدد)</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="errorLabel">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
-      </property>
-      <property name="wordWrap">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton">
-      <property name="cursor">
-       <cursorShape>PointingHandCursor</cursorShape>
-      </property>
-      <property name="text">
-       <string>ثبت‌نام</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="loginBtn">
-      <property name="cursor">
-       <cursorShape>PointingHandCursor</cursorShape>
-      </property>
-      <property name="text">
-       <string>قبلاً حساب دارید؟ وارد شوید</string>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="leftMargin"><number>40</number></property>
+   <property name="topMargin"><number>20</number></property>
+   <property name="rightMargin"><number>40</number></property>
+   <property name="bottomMargin"><number>20</number></property>
+   <property name="spacing"><number>12</number></property>
+   
+   <item>
+    <widget class="QLabel" name="titleLabel">
+     <property name="text"><string>ثبت‌نام 🎲</string></property>
+     <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="descLabel">
+     <property name="text"><string>یک حساب کاربری جدید بسازید</string></property>
+     <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+    </widget>
+   </item>
+   <item><widget class="QLineEdit" name="nameLineEdit"><property name="placeholderText"><string>نام و نام خانوادگی</string></property></widget></item>
+   <item><widget class="QLineEdit" name="usernameLineEdit"><property name="placeholderText"><string>نام کاربری</string></property></widget></item>
+   <item><widget class="QLineEdit" name="phoneLineEdit"><property name="placeholderText"><string>شماره تلفن (09...)</string></property></widget></item>
+   <item><widget class="QLineEdit" name="emailLineEdit"><property name="placeholderText"><string>آدرس ایمیل</string></property></widget></item>
+   <item><widget class="QLineEdit" name="passwordLineEdit"><property name="echoMode"><enum>QLineEdit::EchoMode::Password</enum></property><property name="placeholderText"><string>رمز عبور (حداقل ۸ کاراکتر + عدد)</string></property></widget></item>
+   <item><widget class="QLineEdit" name="confirmPasswordLineEdit"><property name="echoMode"><enum>QLineEdit::EchoMode::Password</enum></property><property name="placeholderText"><string>تکرار رمز عبور</string></property></widget></item>
+   <item>
+    <widget class="QLabel" name="errorLabel">
+     <property name="text"><string/></property>
+     <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushButton">
+     <property name="text"><string>ثبت‌نام</string></property>
+     <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="loginBtn">
+     <property name="text"><string>قبلاً حساب دارید؟ وارد شوید</string></property>
+     <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+    </widget>
+   </item>
+  </layout>
  </widget>
- <resources/>
- <connections/>
 </ui>
