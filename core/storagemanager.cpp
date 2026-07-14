@@ -123,3 +123,95 @@ bool StorageManager::updatePassword(const QString& phone,
     }
     return false;
 }
+QString StorageManager::getHistoryFilePath()
+{
+    return QStandardPaths::writableLocation(
+               QStandardPaths::AppDataLocation) + "/history.json";
+}
+
+bool StorageManager::saveGameRecord(const GameRecord& record)
+{
+    QFile file(getHistoryFilePath());
+    QJsonArray arr;
+
+    if (file.open(QIODevice::ReadOnly)) {
+        arr = QJsonDocument::fromJson(file.readAll()).array();
+        file.close();
+    }
+
+    QJsonObject obj;
+    obj["id"]             = arr.size() + 1;
+    obj["userId"]         = record.userId;
+    obj["gameType"]       = record.gameType;
+    obj["opponent"]       = record.opponentUsername;
+    obj["result"]         = record.result == GameResult::WIN  ? "win"  :
+                        record.result == GameResult::LOSE ? "lose" : "draw";
+    obj["myScore"]        = record.myScore;
+    obj["opponentScore"]  = record.opponentScore;
+    obj["role"]           = record.role;
+    obj["playedAt"]       = record.playedAt.toString(Qt::ISODate);
+    arr.append(obj);
+
+    if (!file.open(QIODevice::WriteOnly)) return false;
+    file.write(QJsonDocument(arr).toJson());
+    return true;
+}
+
+QList<GameRecord> StorageManager::getGameHistory(int userId,
+                                                 const QString& gameType)
+{
+    QList<GameRecord> records;
+    QFile file(getHistoryFilePath());
+    if (!file.open(QIODevice::ReadOnly)) return records;
+
+    QJsonArray arr = QJsonDocument::fromJson(file.readAll()).array();
+
+    for (const QJsonValue& val : arr) {
+        QJsonObject obj = val.toObject();
+        if (obj["userId"].toInt() != userId) continue;
+        if (!gameType.isEmpty() &&
+            obj["gameType"].toString() != gameType) continue;
+
+        GameRecord r;
+        r.id               = obj["id"].toInt();
+        r.userId           = obj["userId"].toInt();
+        r.gameType         = obj["gameType"].toString();
+        r.opponentUsername = obj["opponent"].toString();
+        QString res        = obj["result"].toString();
+        r.result           = res == "win"  ? GameResult::WIN  :
+                       res == "lose" ? GameResult::LOSE :
+                       GameResult::DRAW;
+        r.myScore          = obj["myScore"].toInt();
+        r.opponentScore    = obj["opponentScore"].toInt();
+        r.role             = obj["role"].toString();
+        r.playedAt         = QDateTime::fromString(
+            obj["playedAt"].toString(), Qt::ISODate);
+        records.append(r);
+    }
+    return records;
+}
+
+int StorageManager::getWinCount(int userId, const QString& gameType)
+{
+    int count = 0;
+    for (const auto& r : getGameHistory(userId, gameType))
+        if (r.result == GameResult::WIN) count++;
+    return count;
+}
+
+int StorageManager::getLoseCount(int userId, const QString& gameType)
+{
+    int count = 0;
+    for (const auto& r : getGameHistory(userId, gameType))
+        if (r.result == GameResult::LOSE) count++;
+    return count;
+}
+
+int StorageManager::getDrawCount(int userId, const QString& gameType)
+{
+    int count = 0;
+    for (const auto& r : getGameHistory(userId, gameType))
+        if (r.result == GameResult::DRAW) count++;
+    return count;
+}
+
