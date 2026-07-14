@@ -21,6 +21,7 @@ signals:
     void nineMensMorrisSelected(User user);
     void fanoronaSelected(User user);
     void editProfileSelected(User user);
+    void historySelected();
     void loggedOut();
 
 private slots:
@@ -29,6 +30,7 @@ private slots:
     void onFanoronaClicked();
     void onEditClicked();
     void onLogoutClicked();
+
 
 private:
     Ui::MainMenuWindow* ui;
