@@ -12,6 +12,7 @@ HEADERS += \
     models/gamerecord.h \
     models/user.h \
     ui/historywindow.h \
+    ui/editprofilewindow.h \
     ui/loginwindow.h \
     # ui/mainmenuwindow.h \
     ui/mainmenuwindow.h \
@@ -23,6 +24,7 @@ SOURCES += \
     core/storagemanager.cpp \
     main.cpp \
     ui/historywindow.cpp \
+    ui/editprofilewindow.cpp \
     ui/loginwindow.cpp \
     # ui/mainmenuwindow.cpp \
     ui/mainmenuwindow.cpp \
@@ -30,6 +32,7 @@ SOURCES += \
     ui/signupwindow.cpp
 
 FORMS += \
+    ui/editprofilewindow.ui \
     ui/loginwindow.ui \
     ui/mainmenuwindow.ui \
     ui/recoverywindow.ui \
