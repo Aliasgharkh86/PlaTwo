@@ -123,21 +123,21 @@ QPushButton#backBtn:hover {
     </item>
     <item>
      <widget class="QLineEdit" name="newPasswordLineEdit">
-      <property name="placeholderText">
-       <string>رمز عبور جدید (حداقل ۸ کاراکتر + عدد)</string>
-      </property>
       <property name="echoMode">
        <enum>QLineEdit::EchoMode::Password</enum>
+      </property>
+      <property name="placeholderText">
+       <string>رمز عبور جدید (حداقل ۸ کاراکتر + عدد)</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QLineEdit" name="confirmPasswordLineEdit">
-      <property name="placeholderText">
-       <string>تکرار رمز عبور جدید</string>
-      </property>
       <property name="echoMode">
        <enum>QLineEdit::EchoMode::Password</enum>
+      </property>
+      <property name="placeholderText">
+       <string>تکرار رمز عبور جدید</string>
       </property>
      </widget>
     </item>
@@ -168,6 +168,9 @@ QPushButton#backBtn:hover {
      <widget class="QPushButton" name="confirmBtn">
       <property name="cursor">
        <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
       </property>
       <property name="text">
        <string>تغییر رمز عبور</string>
