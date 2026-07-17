@@ -9,7 +9,9 @@ CONFIG += c++17
 HEADERS += \
     core/authmanager.h \
     core/storagemanager.h \
+    models/gamerecord.h \
     models/user.h \
+    ui/historywindow.h \
     ui/loginwindow.h \
     # ui/mainmenuwindow.h \
     ui/mainmenuwindow.h \
@@ -20,6 +22,7 @@ SOURCES += \
     core/authmanager.cpp \
     core/storagemanager.cpp \
     main.cpp \
+    ui/historywindow.cpp \
     ui/loginwindow.cpp \
     # ui/mainmenuwindow.cpp \
     ui/mainmenuwindow.cpp \
