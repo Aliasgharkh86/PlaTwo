@@ -10,6 +10,7 @@ HEADERS += \
     core/authmanager.h \
     core/storagemanager.h \
     models/user.h \
+    ui/editprofilewindow.h \
     ui/loginwindow.h \
     # ui/mainmenuwindow.h \
     ui/mainmenuwindow.h \
@@ -20,6 +21,7 @@ SOURCES += \
     core/authmanager.cpp \
     core/storagemanager.cpp \
     main.cpp \
+    ui/editprofilewindow.cpp \
     ui/loginwindow.cpp \
     # ui/mainmenuwindow.cpp \
     ui/mainmenuwindow.cpp \
@@ -27,6 +29,7 @@ SOURCES += \
     ui/signupwindow.cpp
 
 FORMS += \
+    ui/editprofilewindow.ui \
     ui/loginwindow.ui \
     ui/mainmenuwindow.ui \
     ui/recoverywindow.ui \

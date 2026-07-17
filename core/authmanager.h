@@ -30,6 +30,10 @@ public:
     bool validatePhone(const QString& phone);
     bool validateEmail(const QString& email);
     bool validatePassword(const QString& pass);
+    bool updateUserProfile(int userId, const QString& name, const QString& username,
+                                        const QString& phone, const QString& email,
+                                         const QString& password, QString& outError);
+    bool updateUserProfile(const QString& oldUsername, const QString& newName, const QString& newUsername, const QString& newPhone, const QString& newEmail, const QString& newPassword, QString& errorMsg);
 
 private:
     AuthManager() = default;

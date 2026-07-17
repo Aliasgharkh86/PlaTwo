@@ -2,6 +2,8 @@
 #include "ui_mainmenuwindow.h"
 #include <QMessageBox>
 #include <QPushButton>
+#include "editprofilewindow.h"
+
 
 MainMenuWindow::MainMenuWindow(const User& user, QWidget* parent)
     : QDialog(parent)
@@ -48,7 +50,33 @@ void MainMenuWindow::onFanoronaClicked()
 
 void MainMenuWindow::onEditClicked()
 {
-    emit editProfileSelected(m_user);
+    // ۱. ساختن شیء از پنجره ویرایش پروفایل
+    EditProfileWindow *editWin = new EditProfileWindow(this);
+
+    // ۲. ارسال اطلاعات کاربر فعلی (m_user) به پنجره ویرایش
+    editWin->setCurrentUser(m_user);
+
+    // ۳. اتصال سیگنال آپدیت شدن پروفایل برای بروزرسانی رابط کاربری منوی اصلی
+    connect(editWin, &EditProfileWindow::profileUpdated, this, [this](const User& updatedUser){
+        // آپدیت کردن اطلاعات متغیر کلاس
+        this->m_user = updatedUser;
+
+        // آپدیت کردن لیبل خوش‌آمدگویی با نام جدید
+        ui->welcomeLabel->setText("خوش آمدید، " + m_user.name + " 👋");
+    });
+
+    // ۴. نمایش پنجره (رفع خطای exec)
+    // چون کلاس از نوع QWidget است، آن را به عنوان یک پنجره مستقل (Window) تعریف می‌کنیم
+    editWin->setWindowFlags(Qt::Window);
+
+    // حالت Modal به آن می‌دهیم تا بقیه برنامه‌ قفل شود تا زمانی که این پنجره بسته شود
+    editWin->setWindowModality(Qt::ApplicationModal);
+
+    // برای جلوگیری از نشت حافظه (Memory Leak) وقتی پنجره بسته شد، خودبه‌خود پاک شود
+    editWin->setAttribute(Qt::WA_DeleteOnClose);
+
+    // نمایش پنجره
+    editWin->show();
 }
 
 void MainMenuWindow::onLogoutClicked()
@@ -61,3 +89,5 @@ void MainMenuWindow::onLogoutClicked()
     if (reply == QMessageBox::Yes)
         emit loggedOut();
 }
+
+

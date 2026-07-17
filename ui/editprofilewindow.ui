@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SignUpWindow</class>
- <widget class="QDialog" name="SignUpWindow">
+ <class>EditProfileWindow</class>
+ <widget class="QWidget" name="EditProfileWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>433</width>
-    <height>506</height>
+    <width>467</width>
+    <height>428</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>PlaTwo - ثبت‌نام</string>
+   <string>Form</string>
   </property>
   <property name="styleSheet">
    <string notr="true">
@@ -22,7 +22,7 @@ QWidget {
     font-size: 13px;
 }
 QLabel#titleLabel {
-    color: #a6e3a1;
+    color: #89b4fa;
     font-size: 22px;
     font-weight: bold;
 }
@@ -44,10 +44,10 @@ QLineEdit {
     min-height: 20px;
 }
 QLineEdit:focus {
-    border-color: #a6e3a1;
+    border-color: #89b4fa;
 }
-QPushButton#pushButton {
-    background-color: #a6e3a1;
+QPushButton#loginBtn {
+    background-color: #89b4fa;
     color: #1e1e2e;
     border: none;
     border-radius: 10px;
@@ -56,54 +56,64 @@ QPushButton#pushButton {
     padding: 12px;
     min-height: 20px;
 }
-QPushButton#pushButton:hover {
-    background-color: #94e2d5;
+QPushButton#loginBtn:hover {
+    background-color: #b4befe;
 }
-QPushButton#pushButton:pressed {
-    background-color: #89dceb;
+QPushButton#loginBtn:pressed {
+    background-color: #cba6f7;
 }
-QPushButton#backToLoginButton {
+QPushButton#signupBtn {
     color: #89b4fa;
     border: none;
     background: transparent;
     font-size: 11px;
     text-decoration: underline;
 }
-QPushButton#backToLoginButton:hover {
+QPushButton#signupBtn:hover {
     color: #cba6f7;
+}
+QPushButton#forgotBtn {
+    color: #6c7086;
+    border: none;
+    background: transparent;
+    font-size: 11px;
+    text-decoration: underline;
+}
+QPushButton#forgotBtn:hover {
+    color: #cdd6f4;
 }
    </string>
   </property>
-  <widget class="QWidget" name="centralWidget">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>20</y>
-     <width>340</width>
-     <height>460</height>
+     <x>80</x>
+     <y>10</y>
+     <width>321</width>
+     <height>391</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="spacing">
-     <number>12</number>
-    </property>
-    <item>
-     <widget class="QLabel" name="titleLabel">
-      <property name="text">
-       <string>ثبت‌نام 🎲</string>
+    <item alignment="Qt::AlignmentFlag::AlignHCenter">
+     <widget class="QLabel" name="label">
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>-1</pointsize>
+       </font>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+      <property name="text">
+       <string>ویرایش پروفایل ✏️</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="descLabel">
-      <property name="text">
-       <string>یک حساب کاربری جدید بسازید</string>
+     <widget class="QLabel" name="errorLabel">
+      <property name="styleSheet">
+       <string notr="true">color: red;</string>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </item>
@@ -124,7 +134,7 @@ QPushButton#backToLoginButton:hover {
     <item>
      <widget class="QLineEdit" name="phoneLineEdit">
       <property name="placeholderText">
-       <string>شماره تلفن (09...)</string>
+       <string>شماره تلفن</string>
       </property>
      </widget>
     </item>
@@ -141,40 +151,36 @@ QPushButton#backToLoginButton:hover {
        <enum>QLineEdit::EchoMode::Password</enum>
       </property>
       <property name="placeholderText">
-       <string>رمز عبور (حداقل ۸ کاراکتر + عدد)</string>
+       <string>رمز عبور جدید </string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="errorLabel">
+     <widget class="QPushButton" name="saveBtn">
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: blue;</string>
+      </property>
       <property name="text">
-       <string/>
+       <string>ذخیره تغییرات</string>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
-      </property>
-      <property name="wordWrap">
+      <property name="flat">
        <bool>true</bool>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="backBtn">
       <property name="cursor">
        <cursorShape>PointingHandCursor</cursorShape>
       </property>
-      <property name="text">
-       <string>ثبت‌نام</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="loginBtn">
-      <property name="cursor">
-       <cursorShape>PointingHandCursor</cursorShape>
+      <property name="styleSheet">
+       <string notr="true">color: blue;</string>
       </property>
       <property name="text">
-       <string>قبلاً حساب دارید؟ وارد شوید</string>
+       <string>بازگشت به منوی اصلی</string>
       </property>
       <property name="flat">
        <bool>true</bool>
