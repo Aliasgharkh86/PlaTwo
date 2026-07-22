@@ -22,12 +22,12 @@ public:
     ~GameLobbyWindow();
 
 signals:
-    // void gameReady(GameClient* client,
-    //                const QString& player1,
-    //                const QString& player2,
-    //                int boardSize,
-    //                bool hasTimer,
-    //                int timerSeconds);
+    void gameReady(GameClient* client,
+                   const QString& player1,
+                   const QString& player2,
+                   int boardSize,
+                   bool hasTimer,
+                   int timerSeconds);
     void backToMenu();
 
 private slots:
@@ -60,7 +60,7 @@ private:
     User        m_currentUser;
     GameType    m_gameType;
     // Gameserver* m_server = nullptr;
-    // GameClient* m_client;
+    GameClient* m_client;
 };
 
 #endif // GAMELOBBYWINDOW_H
