@@ -79,7 +79,7 @@ QPushButton#backToLoginButton:hover {
     <rect>
      <x>40</x>
      <y>20</y>
-     <width>340</width>
+     <width>301</width>
      <height>460</height>
     </rect>
    </property>

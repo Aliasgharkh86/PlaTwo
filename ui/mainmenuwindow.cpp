@@ -24,6 +24,7 @@ MainMenuWindow::MainMenuWindow(const User& user, QWidget* parent)
             this,             &MainMenuWindow::onEditClicked);
     connect(ui->exitBtn,     &QPushButton::clicked,
             this,             &MainMenuWindow::onLogoutClicked);
+
 }
 
 MainMenuWindow::~MainMenuWindow()

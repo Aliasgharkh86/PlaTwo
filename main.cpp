@@ -79,11 +79,13 @@
 #include "ui/signupwindow.h"
 #include "ui/recoverywindow.h"
 #include "ui/mainmenuwindow.h"
+#include "ui/historywindow.h"
 #include "models/user.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    a.setApplicationName("PlaTwo");
 
     LoginWindow*    login    = new LoginWindow();
     SignUpWindow*   signup   = new SignUpWindow();
@@ -121,17 +123,34 @@ int main(int argc, char *argv[])
 
         MainMenuWindow* menu = new MainMenuWindow(user);
 
-        // خروج از منو → برگشت به login
         QObject::connect(menu, &MainMenuWindow::loggedOut, [=]() {
             menu->hide();
             menu->deleteLater();
             login->show();
         });
 
-        // TODO: وصل کردن دکمه‌های بازی به GameLobbyWindow
-        // QObject::connect(menu, &MainMenuWindow::dotsAndBoxesSelected, ...);
-        // QObject::connect(menu, &MainMenuWindow::nineMensMorrisSelected, ...);
-        // QObject::connect(menu, &MainMenuWindow::fanoronaSelected, ...);
+        // هر دکمه بازی → صفحه اختصاصی اون بازی
+        // که شامل تاریخچه + شروع بازی جدید هست
+        auto openHistory = [=](const QString& gameType) {
+            HistoryWindow* history = new HistoryWindow(user, gameType);
+
+            QObject::connect(history, &HistoryWindow::backToMenu, [history, menu]() {
+                history->hide();
+                history->deleteLater();
+                menu->show();
+            });
+
+            menu->hide();
+            history->show();
+        };
+        QObject::connect(menu, &MainMenuWindow::dotsAndBoxesSelected,
+                         [=]() { openHistory("dots_and_boxes"); });
+
+        QObject::connect(menu, &MainMenuWindow::nineMensMorrisSelected,
+                         [=]() { openHistory("nine_mens_morris"); });
+
+        QObject::connect(menu, &MainMenuWindow::fanoronaSelected,
+                         [=]() { openHistory("fanorona"); });
 
         menu->show();
     });
@@ -139,3 +158,4 @@ int main(int argc, char *argv[])
     login->show();
     return a.exec();
 }
+

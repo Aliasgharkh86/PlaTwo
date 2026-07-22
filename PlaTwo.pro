@@ -9,11 +9,13 @@ CONFIG += c++17
 HEADERS += \
     core/authmanager.h \
     core/storagemanager.h \
+    models/gamerecord.h \
     models/user.h \
     network/gameclient.h \
     network/gamemessage.h \
     network/gameroom.h \
     ui/gamelobbywindow.h \
+    ui/historywindow.h \
     ui/loginwindow.h \
     # ui/mainmenuwindow.h \
     ui/mainmenuwindow.h \
@@ -26,6 +28,7 @@ SOURCES += \
     main.cpp \
     network/gameclient.cpp \
     ui/gamelobbywindow.cpp \
+    ui/historywindow.cpp \
     ui/loginwindow.cpp \
     # ui/mainmenuwindow.cpp \
     ui/mainmenuwindow.cpp \
