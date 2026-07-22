@@ -1,4 +1,4 @@
-QT += widgets
+QT += widgets network
 
 CONFIG += c++17
 
@@ -11,6 +11,10 @@ HEADERS += \
     core/storagemanager.h \
     models/gamerecord.h \
     models/user.h \
+    network/gameclient.h \
+    network/gamemessage.h \
+    network/gameroom.h \
+    ui/gamelobbywindow.h \
     ui/historywindow.h \
     ui/loginwindow.h \
     # ui/mainmenuwindow.h \
@@ -22,6 +26,8 @@ SOURCES += \
     core/authmanager.cpp \
     core/storagemanager.cpp \
     main.cpp \
+    network/gameclient.cpp \
+    ui/gamelobbywindow.cpp \
     ui/historywindow.cpp \
     ui/loginwindow.cpp \
     # ui/mainmenuwindow.cpp \
@@ -30,6 +36,7 @@ SOURCES += \
     ui/signupwindow.cpp
 
 FORMS += \
+    ui/gamelobbywindow.ui \
     ui/loginwindow.ui \
     ui/mainmenuwindow.ui \
     ui/recoverywindow.ui \
