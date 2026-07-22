@@ -124,7 +124,7 @@ QPushButton#linkBtn:hover { color: #cdd6f4; }
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="rolePage">
       <layout class="QVBoxLayout" name="roleLayout">
