@@ -20,15 +20,21 @@ class HistoryWindow : public QWidget
     Q_OBJECT
 
 public:
+    // تغییر ۱: پارامتر gameType اضافه شد
+    // تا بدونیم از کدوم بازی وارد شدیم و لابی رو
+    // با همون gameType باز کنیم
     explicit HistoryWindow(const User& user,
-                           const QString& gameType = "",
+                           const QString& gameType,
                            QWidget* parent = nullptr);
+
 signals:
     void backToMenu();
+    void startNewGame(); // تغییر ۲: این signal اضافه شد
 
 private slots:
     void onFilterChanged(int index);
     void onBackClicked();
+    void onStartGameClicked(); // تغییر ۳: اسلات دکمه‌ی شروع بازی
 
 private:
     // ── Setup ──────────────────────────────────
@@ -57,11 +63,13 @@ private:
     QComboBox*    m_filterCombo;
     QTableWidget* m_table;
 
-    // دکمه بازگشت
+    // دکمه‌ها
     QPushButton*  m_backBtn;
+    QPushButton*  m_startGameBtn; // تغییر ۳: دکمه‌ی جدید
 
     // ── State ──────────────────────────────────
-    User m_currentUser;
+    User    m_currentUser;
+    QString m_gameType; // تغییر ۱: ذخیره‌ی نوع بازی
 };
 
 #endif // HISTORYWINDOW_H
