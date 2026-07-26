@@ -9,29 +9,40 @@ CONFIG += c++17
 HEADERS += \
     core/authmanager.h \
     core/storagemanager.h \
+    games/fanoronagame.h \
+    games/game.h \
+    games/ninemensmorrisgame.h \
     models/gamerecord.h \
     models/user.h \
     network/gameclient.h \
     network/gamemessage.h \
     network/gameroom.h \
+    ui/fanoronagamewidget.h \
+    ui/gameboardwindow.h \
     ui/gamelobbywindow.h \
     ui/historywindow.h \
     ui/loginwindow.h \
     # ui/mainmenuwindow.h \
     ui/mainmenuwindow.h \
+    ui/ninemensmorriswidget.h \
     ui/recoverywindow.h \
     ui/signupwindow.h
 
 SOURCES += \
     core/authmanager.cpp \
     core/storagemanager.cpp \
+    games/fanoronagame.cpp \
+    games/ninemensmorrisgame.cpp \
     main.cpp \
     network/gameclient.cpp \
+    ui/fanoronagamewidget.cpp \
+    ui/gameboardwindow.cpp \
     ui/gamelobbywindow.cpp \
     ui/historywindow.cpp \
     ui/loginwindow.cpp \
     # ui/mainmenuwindow.cpp \
     ui/mainmenuwindow.cpp \
+    ui/ninemensmorriswidget.cpp \
     ui/recoverywindow.cpp \
     ui/signupwindow.cpp
 
