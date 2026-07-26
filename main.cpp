@@ -80,10 +80,14 @@
 #include "ui/recoverywindow.h"
 #include "ui/mainmenuwindow.h"
 #include "models/user.h"
+#include "network/gameserver.h"
+
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    GameServer *server = new GameServer(&a);
+    server->startServer(54321);
 
     LoginWindow*    login    = new LoginWindow();
     SignUpWindow*   signup   = new SignUpWindow();
