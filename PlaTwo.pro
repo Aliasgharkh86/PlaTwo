@@ -11,36 +11,50 @@ HEADERS += \
     core/storagemanager.h \
     models/gamerecord.h \
     models/user.h \
+
+    network/gameserver.h \
+    ui/editprofilewindow.h \
+
     network/gameclient.h \
     network/gamemessage.h \
     network/gameroom.h \
     ui/gamelobbywindow.h \
+
     ui/historywindow.h \
+
     ui/loginwindow.h \
-    # ui/mainmenuwindow.h \
     ui/mainmenuwindow.h \
     ui/recoverywindow.h \
-    ui/signupwindow.h
+
 
 SOURCES += \
     core/authmanager.cpp \
     core/storagemanager.cpp \
     main.cpp \
+
     network/gameclient.cpp \
     ui/gamelobbywindow.cpp \
     ui/historywindow.cpp \
+
+    network/gameserver.cpp \
+    ui/editprofilewindow.cpp \
+    network/gameclient.cpp \
+    ui/gamelobbywindow.cpp \
+
     ui/loginwindow.cpp \
-    # ui/mainmenuwindow.cpp \
     ui/mainmenuwindow.cpp \
     ui/recoverywindow.cpp \
-    ui/signupwindow.cpp
+
 
 FORMS += \
+
+    ui/editprofilewindow.ui \
+
     ui/gamelobbywindow.ui \
     ui/loginwindow.ui \
     ui/mainmenuwindow.ui \
     ui/recoverywindow.ui \
-    ui/signupwindow.ui
+
 
 
 # Default rules for deployment.
