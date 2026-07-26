@@ -17,19 +17,13 @@ HistoryWindow::HistoryWindow(const User& user,
                              QWidget* parent)
     : QWidget(parent)
     , m_currentUser(user)
+    , m_gameType(gameType)
 {
     setupUi();
     applyStyles();
-
-    // اگه gameType مشخص بود، فیلتر رو روی اون بذار
-    if (!gameType.isEmpty()) {
-        int idx = m_filterCombo->findData(gameType);
-        if (idx >= 0)
-            m_filterCombo->setCurrentIndex(idx);  // این خودش loadHistory رو صدا می‌زنه
-    } else {
-        loadHistory();
-    }
+    loadHistory(m_gameType); // بار اول همون بازی‌ای که از اونجا اومدیم
 }
+
 // ─────────────────────────────────────────────
 //  setupUi
 // ─────────────────────────────────────────────
@@ -127,6 +121,11 @@ void HistoryWindow::setupUi()
     m_backBtn->setCursor(Qt::PointingHandCursor);
     m_backBtn->setFlat(true);
 
+    m_startGameBtn = new QPushButton("🎮  شروع بازی جدید", this);
+    m_startGameBtn->setObjectName("startGameBtn");
+    m_startGameBtn->setCursor(Qt::PointingHandCursor);
+    m_startGameBtn->setFixedHeight(40);
+
     // ── چیدمان نهایی ──────────────────────────
     mainLayout->addWidget(m_titleLabel);
     mainLayout->addWidget(m_subtitleLabel);
@@ -135,7 +134,13 @@ void HistoryWindow::setupUi()
     mainLayout->addLayout(filterLayout);
     mainLayout->addWidget(m_table);
     mainLayout->addWidget(line2);
-    mainLayout->addWidget(m_backBtn, 0, Qt::AlignCenter);
+
+    // دکمه‌ی شروع بازی + بازگشت کنار هم
+    auto* bottomLayout = new QHBoxLayout();
+    bottomLayout->addWidget(m_backBtn);
+    bottomLayout->addStretch();
+    bottomLayout->addWidget(m_startGameBtn);
+    mainLayout->addLayout(bottomLayout);
 
     // ── اتصالات ───────────────────────────────
     connect(m_filterCombo,
@@ -144,6 +149,9 @@ void HistoryWindow::setupUi()
 
     connect(m_backBtn, &QPushButton::clicked,
             this,       &HistoryWindow::onBackClicked);
+
+    connect(m_startGameBtn, &QPushButton::clicked,
+            this,            &HistoryWindow::onStartGameClicked);
 }
 
 // ─────────────────────────────────────────────
@@ -248,6 +256,17 @@ void HistoryWindow::applyStyles()
             background: transparent;
         }
         QPushButton#linkBtn:hover { color: #cba6f7; }
+
+        QPushButton#startGameBtn {
+            background-color: #cba6f7;
+            color: #1e1e2e;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 24px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        QPushButton#startGameBtn:hover { background-color: #b4befe; }
     )");
 }
 
@@ -361,4 +380,9 @@ void HistoryWindow::onFilterChanged(int index)
 void HistoryWindow::onBackClicked()
 {
     emit backToMenu();
+}
+
+void HistoryWindow::onStartGameClicked()
+{
+    emit startNewGame();
 }
