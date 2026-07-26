@@ -20,6 +20,10 @@ public:
     bool emailExists(const QString& email);
     std::optional<User> findByUsernameOrPhone(const QString& val);
     bool updatePassword(const QString& phone, const QString& newHash);
+    User findById(int id);
+    bool updateUser(const User& updatedUser, QString& outError);
+    bool updateUser(const QString& oldUsername, const User& updatedUser);
+
 
     // ---- تاریخچه بازی‌ها ---- ← اینا رو اضافه کن
     bool saveGameRecord(const GameRecord& record);

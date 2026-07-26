@@ -81,11 +81,18 @@
 #include "ui/mainmenuwindow.h"
 #include "ui/historywindow.h"
 #include "models/user.h"
+#include "network/gameserver.h"
+
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+<<<<<<< HEAD
     a.setApplicationName("PlaTwo");
+=======
+    GameServer *server = new GameServer(&a);
+    server->startServer(54321);
+>>>>>>> feature/game-server
 
     LoginWindow*    login    = new LoginWindow();
     SignUpWindow*   signup   = new SignUpWindow();
