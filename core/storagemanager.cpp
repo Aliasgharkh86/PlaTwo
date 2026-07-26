@@ -124,7 +124,7 @@ bool StorageManager::updatePassword(const QString& phone, const QString& newHash
     }
     return false;
 }
-<<<<<<< HEAD
+
 QString StorageManager::getHistoryFilePath()
 {
     return QStandardPaths::writableLocation(
@@ -217,7 +217,6 @@ int StorageManager::getDrawCount(int userId, const QString& gameType)
     return count;
 }
 
-=======
 
 User StorageManager::findById(int id)
 {
@@ -318,4 +317,3 @@ bool StorageManager::updateUser(const QString& oldUsername, const User& updatedU
     }
     return false;
 }
->>>>>>> feature/game-server

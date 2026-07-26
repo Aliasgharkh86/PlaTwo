@@ -22,6 +22,7 @@ HEADERS += \
     ui/gamelobbywindow.h \
     ui/historywindow.h \
     ui/loginwindow.h \
+    ui/signupwindow.h \
     ui/mainmenuwindow.h \
     ui/ninemensmorriswidget.h \
     ui/recoverywindow.h
@@ -40,6 +41,7 @@ SOURCES += \
     ui/gamelobbywindow.cpp \
     ui/historywindow.cpp \
     ui/loginwindow.cpp \
+    ui/signupwindow.cpp \
     ui/mainmenuwindow.cpp \
     ui/ninemensmorriswidget.cpp \
     ui/recoverywindow.cpp

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include "../network/gameclient.h"
-// #include "../network/gameserver.h"
+#include "../network/gameserver.h"
 #include "../network/gameroom.h"
 #include "../models/user.h"
 
@@ -19,6 +19,7 @@ public:
     explicit GameLobbyWindow(const User& currentUser,
                              GameType gameType,
                              QWidget* parent = nullptr);
+    bool isHost() const { return m_server != nullptr; }
     ~GameLobbyWindow();
 
 signals:
@@ -59,7 +60,7 @@ private:
     Ui::GameLobbyWindow* ui;
     User        m_currentUser;
     GameType    m_gameType;
-    // Gameserver* m_server = nullptr;
+    GameServer* m_server = nullptr;
     GameClient* m_client;
 };
 
