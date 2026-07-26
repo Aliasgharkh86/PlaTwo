@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QTcpSocket>
+#include "games/game.h"
 
 enum class GameType {
     DOTS_AND_BOXES   = 0,
@@ -29,6 +30,7 @@ struct GameRoom {
     GameSettings settings;
     bool         gameStarted = false;
     int          currentTurn = 0;
+    Game* game = nullptr;
 
     bool isFull() const {
         return players[0].socket != nullptr

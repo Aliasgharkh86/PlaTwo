@@ -7,6 +7,7 @@ CONFIG += c++17
 HEADERS += \
     core/authmanager.h \
     core/storagemanager.h \
+    games/dotsandboxesgame.h \
     games/fanoronagame.h \
     games/game.h \
     games/ninemensmorrisgame.h \
@@ -16,6 +17,7 @@ HEADERS += \
     network/gamemessage.h \
     network/gameroom.h \
     network/gameserver.h \
+    ui/dotsandboxeswidget.h \
     ui/editprofilewindow.h \
     ui/fanoronagamewidget.h \
     ui/gameboardwindow.h \
@@ -30,11 +32,13 @@ HEADERS += \
 SOURCES += \
     core/authmanager.cpp \
     core/storagemanager.cpp \
+    games/dotsandboxesgame.cpp \
     games/fanoronagame.cpp \
     games/ninemensmorrisgame.cpp \
     main.cpp \
     network/gameclient.cpp \
     network/gameserver.cpp \
+    ui/dotsandboxeswidget.cpp \
     ui/editprofilewindow.cpp \
     ui/fanoronagamewidget.cpp \
     ui/gameboardwindow.cpp \
