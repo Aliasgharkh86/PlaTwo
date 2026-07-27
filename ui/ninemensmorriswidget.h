@@ -51,6 +51,11 @@ private:
     void drawPieces(class QPainter& p) const;
     void drawStatusText(class QPainter& p) const;
 
+    void drawBackground(class QPainter& p) const;
+    void drawMillHighlight(class QPainter& p) const;
+    void drawRemovableHint(class QPainter& p) const;
+    void drawPieceCount(class QPainter& p) const;
+
     bool isMyTurn() const;
 signals:
     void moveReadyToSend(const QVariantMap& moveData);

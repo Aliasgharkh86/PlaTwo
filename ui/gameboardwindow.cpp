@@ -1,66 +1,86 @@
 #include "gameboardwindow.h"
+#include "chatwidget.h"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMessageBox>
+#include <QLabel>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFont>
+#include <QDateTime>
 
-GameBoardWindow::GameBoardWindow(Game*       game,
-                                 QWidget*    boardWidget,
-                                 GameClient* client,
-                                 int         myPlayer,
-                                 QWidget*    parent)
+GameBoardWindow::GameBoardWindow(Game* game, QWidget* boardWidget, GameClient* client,
+                                 int myPlayer, const User& currentUser,
+                                 const QString& gameTypeStr,
+                                 const QString& opponentUsername,
+                                 QWidget* parent)
     : QWidget(parent)
     , m_game(game)
     , m_boardWidget(boardWidget)
     , m_client(client)
     , m_myPlayer(myPlayer)
+    , m_currentUser(currentUser)
+    , m_gameTypeStr(gameTypeStr)
+    , m_opponentUsername(opponentUsername)
+    , m_chatWidget(nullptr)
 {
-    // ── چیدمان داینامیک (بدون .ui) ─────────────
-    auto* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(8, 8, 8, 8);
-    mainLayout->setSpacing(6);
+    const QString titleText = m_game ? m_game->gameName() : "بازی";
+
+    // ── layout اصلی افقی: (تیتر + تخته + دکمه) | چت ──
+    auto* rootLayout = new QHBoxLayout(this);
+    rootLayout->setContentsMargins(8, 8, 8, 8);
+    rootLayout->setSpacing(8);
+
+    // ── ستون چپ ─────────────────────────────────
+    auto* leftLayout = new QVBoxLayout();
+    leftLayout->setSpacing(6);
 
     // تیتر
-    const QString titleText = m_game ? m_game->gameName() : "بازی";
     auto* titleLabel = new QLabel("🎲  " + titleText, this);
     titleLabel->setAlignment(Qt::AlignCenter);
     QFont f = titleLabel->font();
     f.setPointSize(13);
     f.setBold(true);
     titleLabel->setFont(f);
-    mainLayout->addWidget(titleLabel);
+    leftLayout->addWidget(titleLabel);
 
     // تخته‌ی بازی
     if (m_boardWidget) {
         m_boardWidget->setParent(this);
-        mainLayout->addWidget(m_boardWidget, 1);
+        leftLayout->addWidget(m_boardWidget, 1);
 
-        // دریافت حرکت از ویجت بازی
         connect(m_boardWidget, SIGNAL(moveReadyToSend(QVariantMap)),
                 this, SLOT(onMoveReadyToSend(QVariantMap)));
     }
 
     // دکمه‌ی بازگشت
     auto* backBtn = new QPushButton("بازگشت به منو", this);
-    mainLayout->addWidget(backBtn);
+    leftLayout->addWidget(backBtn);
 
+    rootLayout->addLayout(leftLayout, 1);
+
+    // ── ستون راست: چت ───────────────────────────
+    if (m_client) {
+        m_chatWidget = new ChatWidget(m_client->username(), this);
+        m_chatWidget->setClient(m_client);
+        rootLayout->addWidget(m_chatWidget);
+    }
+
+    // ── connects ────────────────────────────────
     connect(backBtn, &QPushButton::clicked,
             this, &GameBoardWindow::backToMenuRequested);
 
-    // ── اتصالات شبکه مطابق با GameClient شما ────────────
     if (m_client) {
-        // ۱. دریافت حرکت حریف از شبکه
         connect(m_client, &GameClient::opponentMoved,
                 this, &GameBoardWindow::onOpponentMoved);
-
-        // ۲. پایان بازی از طرف شبکه
         connect(m_client, &GameClient::gameOver,
                 this, &GameBoardWindow::onGameOver);
-
-        // ۳. قطع اتصال حریف
         connect(m_client, &GameClient::opponentDisconnected,
                 this, &GameBoardWindow::onOpponentDisconnected);
     }
 
-    setMinimumSize(520, 600);
+    setMinimumSize(740, 600);
     setWindowTitle("PlaTwo — " + titleText);
 }
 
@@ -77,7 +97,7 @@ void GameBoardWindow::onMoveReadyToSend(const QVariantMap& moveData)
     int row = -1;
     int col = -1;
 
-    // نگاشت کلیدهای دوز روی row و col برای جلوگیری از مقدار 1- و رد شدن توسط سرور
+    // نگاشت کلیدهای بازی‌های مختلف روی row و col جهت جلوگیری از مقدار ۱- و رد شدن توسط سرور
     if (moveData.contains("remove")) {
         row = moveData.value("remove").toInt();
     } else if (moveData.contains("place")) {
@@ -93,6 +113,7 @@ void GameBoardWindow::onMoveReadyToSend(const QVariantMap& moveData)
     // ارسال به GameClient
     m_client->sendMove(row, col, extraStr);
 }
+
 // ── دریافت حرکت حریف از GameClient ──────────────────────────
 void GameBoardWindow::onOpponentMoved(int row, int col, const QString& extra)
 {
@@ -101,7 +122,7 @@ void GameBoardWindow::onOpponentMoved(int row, int col, const QString& extra)
 
     QVariantMap moveData;
 
-    // ۱. ابتدا تلاش می‌کنیم extra را به عنوان JSON پارس کنیم
+    // ۱. ابتدا تلاش می‌کنیمextra را به عنوان JSON پارس کنیم
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(extra.toUtf8(), &err);
 
@@ -129,8 +150,27 @@ void GameBoardWindow::onOpponentDisconnected()
 void GameBoardWindow::onGameOver(const QString& winner, const QString& reason)
 {
     Q_UNUSED(reason)
+
+    // ── ذخیره‌ی رکورد بازی ──────────────────────
+    GameRecord record;
+    record.userId           = m_currentUser.id;
+    record.gameType         = m_gameTypeStr;
+    record.opponentUsername = m_opponentUsername;
+    record.role             = (m_myPlayer == 0) ? "host" : "guest";
+    record.playedAt         = QDateTime::currentDateTime();
+
+    if (winner.isEmpty())
+        record.result = GameResult::DRAW;
+    else if (winner == m_currentUser.username)
+        record.result = GameResult::WIN;
+    else
+        record.result = GameResult::LOSE;
+
+    StorageManager::instance().saveGameRecord(record);
+    // ─────────────────────────────────────────────
+
     QString msg;
-    if (winner == m_client->username())
+    if (winner == m_currentUser.username)
         msg = "🎉  شما بردید!";
     else if (winner.isEmpty())
         msg = "🤝  مساوی!";

@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QDebug>
 
-// ── پنجره‌های auth ──
+// ── پنجره‌های Auth ──
 #include "ui/loginwindow.h"
 #include "ui/signupwindow.h"
 #include "ui/recoverywindow.h"
@@ -15,12 +15,12 @@
 // ── بازی‌ها ──
 #include "games/ninemensmorrisgame.h"
 #include "games/fanoronagame.h"
-// #include "games/dotsandboxesgame.h"
+#include "games/dotsandboxesgame.h"
 
 // ── ویجت‌های بازی‌ها ──
 #include "ui/ninemensmorriswidget.h"
 #include "ui/fanoronagamewidget.h"
-// #include "ui/dotsandboxeswidget.h"
+#include "ui/dotsandboxeswidget.h"
 
 // ── مدل‌ها ──
 #include "models/user.h"
@@ -33,19 +33,28 @@ static GameType gameTypeFromString(const QString& s)
     return GameType::DOTS_AND_BOXES;
 }
 
-// ─────────────────────────────────────────────
-// فقط Game و Widget می‌سازیم — اتصال شبکه داخل
-// GameBoardWindow انجام می‌شه (نه اینجا)
-// ─────────────────────────────────────────────
 static GameBoardWindow* createBoardWindow(const QString& gameTypeStr,
-                                          GameClient*    client,
-                                          int            myPlayer,
-                                          QWidget*       parent = nullptr)
+                                          GameClient* client, int myPlayer,
+                                          const User& currentUser,
+                                          const QString& opponentUsername,
+                                          int boardSize = 6,
+                                          QWidget* parent = nullptr)
 {
     Game*    game        = nullptr;
     QWidget* boardWidget = nullptr;
 
-    if (gameTypeStr == "nine_mens_morris") {
+    if (gameTypeStr == "dots_and_boxes") {
+        int size = (boardSize >= 6 && boardSize <= 8) ? boardSize : 6;
+        auto* g = new DotsAndBoxesGame(size, size, parent);
+
+        QString p1Name = (myPlayer == 0) ? currentUser.username : opponentUsername;
+        QString p2Name = (myPlayer == 0) ? opponentUsername : currentUser.username;
+
+        auto* w = new DotsAndBoxesWidget(g, myPlayer, p1Name, p2Name);
+        game        = g;
+        boardWidget = w;
+    }
+    else if (gameTypeStr == "nine_mens_morris") {
         auto* g = new NineMensMorrisGame(parent);
         auto* w = new NineMensMorrisWidget(g, myPlayer);
         game        = g;
@@ -54,15 +63,17 @@ static GameBoardWindow* createBoardWindow(const QString& gameTypeStr,
     else if (gameTypeStr == "fanorona") {
         auto* g = new FanoronaGame(parent);
         auto* w = new FanoronaWidget(g, myPlayer);
-        game = g; boardWidget = w;
+        game        = g;
+        boardWidget = w;
     }
     else {
         qDebug() << "این بازی هنوز پیاده‌سازی نشده:" << gameTypeStr;
         return nullptr;
     }
 
-    // GameBoardWindow خودش شبکه رو وصل می‌کنه
-    return new GameBoardWindow(game, boardWidget, client, myPlayer, parent);
+    return new GameBoardWindow(game, boardWidget, client, myPlayer,
+                               currentUser, gameTypeStr, opponentUsername,
+                               parent);
 }
 
 int main(int argc, char* argv[])
@@ -74,13 +85,13 @@ int main(int argc, char* argv[])
     auto* signup   = new SignUpWindow();
     auto* recovery = new RecoveryWindow();
 
-    QObject::connect(login,  &LoginWindow::switchToSignup, [=]() {
+    QObject::connect(login, &LoginWindow::switchToSignup, [=]() {
         login->hide(); signup->show();
     });
     QObject::connect(signup, &SignUpWindow::switchToLogin, [=]() {
         signup->hide(); login->show();
     });
-    QObject::connect(login,    &LoginWindow::switchToRecovery, [=]() {
+    QObject::connect(login, &LoginWindow::switchToRecovery, [=]() {
         login->hide(); recovery->show();
     });
     QObject::connect(recovery, &RecoveryWindow::switchToLogin, [=]() {
@@ -126,15 +137,16 @@ int main(int argc, char* argv[])
 
                 QObject::connect(lobby, &GameLobbyWindow::gameReady,
                                  [=](GameClient* client, const QString& p1,
-                                                                         const QString& p2, int boardSize,
-                                                                         bool hasTimer, int timerSecs)
+                                     const QString& p2, int boardSize,
+                                     bool hasTimer, int timerSecs)
                                  {
-                                     Q_UNUSED(p1) Q_UNUSED(p2)
-                                     Q_UNUSED(boardSize) Q_UNUSED(hasTimer) Q_UNUSED(timerSecs)
+                                     Q_UNUSED(hasTimer) Q_UNUSED(timerSecs)
 
                                      const int myPlayer = lobby->isHost() ? 0 : 1;
+                                     const QString opponentUsername = (myPlayer == 0) ? p2 : p1;
 
-                                     auto* board = createBoardWindow(gameTypeStr, client, myPlayer);
+                                     auto* board = createBoardWindow(gameTypeStr, client, myPlayer,
+                                                                     user, opponentUsername, boardSize);
                                      if (!board) return;
 
                                      lobby->hide();

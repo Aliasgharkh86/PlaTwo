@@ -16,6 +16,8 @@ HEADERS += \
     network/gamemessage.h \
     network/gameroom.h \
     network/gameserver.h \
+    ui/chatwidget.h \
+    ui/dotsandboxeswidget.h \
     ui/editprofilewindow.h \
     ui/fanoronagamewidget.h \
     ui/gameboardwindow.h \
@@ -35,6 +37,8 @@ SOURCES += \
     main.cpp \
     network/gameclient.cpp \
     network/gameserver.cpp \
+    ui/chatwidget.cpp \
+    ui/dotsandboxeswidget.cpp \
     ui/editprofilewindow.cpp \
     ui/fanoronagamewidget.cpp \
     ui/gameboardwindow.cpp \
@@ -47,6 +51,7 @@ SOURCES += \
     ui/recoverywindow.cpp
 
 FORMS += \
+    ui/chatwidget.ui \
     ui/editprofilewindow.ui \
     ui/gamelobbywindow.ui \
     ui/loginwindow.ui \

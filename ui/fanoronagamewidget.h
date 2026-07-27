@@ -64,6 +64,11 @@ private:
     bool isMyTurn() const;
     void attemptMove(int from, int to);
     void updateEndTurnButtonVisibility();
+
+    void drawBackground(QPainter& p) const;
+    void drawPieceCount(QPainter& p) const;
+signals:
+    void moveReadyToSend(const QVariantMap& moveData);
 };
 
 #endif // FANORONAWIDGET_H

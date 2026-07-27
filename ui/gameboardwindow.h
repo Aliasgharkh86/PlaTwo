@@ -8,19 +8,23 @@
 #include <QMessageBox>
 #include <QVariantMap>
 
+#include "../models/user.h"
+#include "../models/gamerecord.h"
+#include "../core/storagemanager.h"
 #include "games/game.h"
 #include "../network/gameclient.h"
+#include "chatwidget.h"
 
 class GameBoardWindow : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit GameBoardWindow(Game*       game,
-                             QWidget*    boardWidget,
-                             GameClient* client,
-                             int         myPlayer,
-                             QWidget*    parent = nullptr);
+    explicit GameBoardWindow(Game* game, QWidget* boardWidget, GameClient* client,
+                             int myPlayer, const User& currentUser,
+                             const QString& gameTypeStr,
+                             const QString& opponentUsername,
+                             QWidget* parent = nullptr);
     ~GameBoardWindow() override = default;
 
 signals:
@@ -37,6 +41,10 @@ private:
     QWidget*     m_boardWidget;
     GameClient*  m_client;
     int          m_myPlayer; // 0 = Host, 1 = Guest
+    ChatWidget* m_chatWidget = nullptr;
+    User    m_currentUser;
+    QString m_gameTypeStr;
+    QString m_opponentUsername;
 };
 
 #endif // GAMEBOARDWINDOW_H

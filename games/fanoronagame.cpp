@@ -22,17 +22,18 @@ void FanoronaGame::resetGame()
         m_board[i] = 0;
 
     for (int c = 0; c < COLS; ++c) {
-        m_board[0 * COLS + c] = 1; // row0 -> W (Player 0)
-        m_board[1 * COLS + c] = 1; // row1 -> W
-        m_board[3 * COLS + c] = 2; // row3 -> B (Player 1)
-        m_board[4 * COLS + c] = 2; // row4 -> B
+        m_board[0 * COLS + c] = 2; // ردیف‌های بالا -> خاکستری (بازیکن 1)
+        m_board[1 * COLS + c] = 2;
+        m_board[3 * COLS + c] = 1; // ردیف‌های پایین -> نارنجی (بازیکن 0)
+        m_board[4 * COLS + c] = 1;
     }
 
-    static const int midRow[COLS] = {2, 1, 2, 1, 0, 2, 1, 2, 1};
+    // سطر وسط: شروع با نارنجی (1) و سپس خاکستری (2)
+    static const int midRow[COLS] = {1, 2, 1, 2, 0, 1, 2, 1, 2};
     for (int c = 0; c < COLS; ++c)
         m_board[2 * COLS + c] = midRow[c];
 
-    m_currentPlayer    = 1;
+    m_currentPlayer    = 0; // 👈 نوبت به 0 برگشت تا با GameServer هماهنگ شود
     m_piecesOnBoard[0] = 22;
     m_piecesOnBoard[1] = 22;
     m_winner           = -2;
