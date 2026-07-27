@@ -1,5 +1,6 @@
 #include "dotsandboxeswidget.h"
 #include <QPainter>
+<<<<<<< HEAD
 #include <QPainterPath>
 #include <cmath>
 
@@ -16,11 +17,26 @@ DotsAndBoxesWidget::DotsAndBoxesWidget(DotsAndBoxesGame* game, int myPlayer, con
     if (m_game) {
         // بازپاشی صفحه به محض تغییر وضعیت بازی
         connect(m_game, &Game::boardChanged, this, [this]() {
+=======
+#include <QMouseEvent>
+
+DotsAndBoxesWidget::DotsAndBoxesWidget(DotsAndBoxesGame* game, int myPlayer, QWidget *parent)
+    : QWidget(parent), m_game(game), m_myPlayer(myPlayer),
+    m_cellSize(60), m_margin(50), m_dotRadius(6), m_lineThickness(8), m_hitRadius(15)
+{
+    if (m_game) {
+        int w = 2 * m_margin + m_game->getCols() * m_cellSize;
+        int h = 2 * m_margin + m_game->getRows() * m_cellSize;
+        setMinimumSize(w, h);
+
+        connect(m_game, &Game::boardChanged, this, [this](){
+>>>>>>> 60a91530bac12adf7d18b37c7237ef6391ae8288
             update();
         });
     }
 }
 
+<<<<<<< HEAD
 void DotsAndBoxesWidget::setPlayerNames(const QString& p1Name, const QString& p2Name)
 {
     m_player1Name = p1Name;
@@ -160,6 +176,9 @@ DotsAndBoxesWidget::LineHoverInfo DotsAndBoxesWidget::hitTestLine(const QPoint& 
 }
 
 void DotsAndBoxesWidget::paintEvent(QPaintEvent* event)
+=======
+void DotsAndBoxesWidget::paintEvent(QPaintEvent *event)
+>>>>>>> 60a91530bac12adf7d18b37c7237ef6391ae8288
 {
     Q_UNUSED(event);
     if (!m_game) return;
@@ -167,6 +186,7 @@ void DotsAndBoxesWidget::paintEvent(QPaintEvent* event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
+<<<<<<< HEAD
     QVariantMap state = m_game->getBoardState().toMap();
     int pRows = state["pointRows"].toInt();
     int pCols = state["pointCols"].toInt();
@@ -212,10 +232,25 @@ void DotsAndBoxesWidget::paintEvent(QPaintEvent* event)
                 painter.setPen((owner == 0) ? p1Color : p2Color);
                 QString initial = (owner == 0) ? p1Initial : p2Initial;
                 painter.drawText(boxRect, Qt::AlignCenter, initial);
+=======
+    int rows = m_game->getRows();
+    int cols = m_game->getCols();
+
+    for (int r = 0; r < rows; ++r) {
+        for (int c = 0; c < cols; ++c) {
+            int owner = m_game->boxOwner(r, c);
+            if (owner != -1) {
+                QRect rect(m_margin + c * m_cellSize, m_margin + r * m_cellSize, m_cellSize, m_cellSize);
+                if (owner == 0)
+                    painter.fillRect(rect, QColor(100, 150, 255, 150));
+                else
+                    painter.fillRect(rect, QColor(255, 100, 100, 150));
+>>>>>>> 60a91530bac12adf7d18b37c7237ef6391ae8288
             }
         }
     }
 
+<<<<<<< HEAD
     // ── ۲. رسم خط Hover (هایلایت پیش‌نمایش کلیک) ───────────────────────────
     if (m_hoveredLine.valid && isMyTurn() && !m_game->isGameOver()) {
         int currPlayer = m_game->currentPlayer();
@@ -250,10 +285,20 @@ void DotsAndBoxesWidget::paintEvent(QPaintEvent* event)
                 double x2 = margin + (c + 1) * cellW;
                 double y  = margin + r * cellH;
             painter.drawLine(QPointF(x1, y), QPointF(x2, y));
+=======
+    painter.setPen(QPen(Qt::black, m_lineThickness, Qt::SolidLine, Qt::RoundCap));
+    for (int r = 0; r <= rows; ++r) {
+        for (int c = 0; c < cols; ++c) {
+            if (m_game->hasHLine(r, c)) {
+                int x = m_margin + c * m_cellSize;
+                int y = m_margin + r * m_cellSize;
+                painter.drawLine(x, y, x + m_cellSize, y);
+>>>>>>> 60a91530bac12adf7d18b37c7237ef6391ae8288
             }
         }
     }
 
+<<<<<<< HEAD
     // ── ۴. رسم خطوط عمودی ثبت‌شده ──────────────────────────────────────────
     for (int r = 0; r < pRows - 1; ++r) {
         QVariantList rowList = vLines[r].toList();
@@ -263,10 +308,19 @@ void DotsAndBoxesWidget::paintEvent(QPaintEvent* event)
                 double y1 = margin + r * cellH;
                 double y2 = margin + (r + 1) * cellH;
                 painter.drawLine(QPointF(x, y1), QPointF(x, y2));
+=======
+    for (int r = 0; r < rows; ++r) {
+        for (int c = 0; c <= cols; ++c) {
+            if (m_game->hasVLine(r, c)) {
+                int x = m_margin + c * m_cellSize;
+                int y = m_margin + r * m_cellSize;
+                painter.drawLine(x, y, x, y + m_cellSize);
+>>>>>>> 60a91530bac12adf7d18b37c7237ef6391ae8288
             }
         }
     }
 
+<<<<<<< HEAD
     // ── ۵. رسم نقاط شبکه (Dots) ───────────────────────────────────────────
     painter.setPen(Qt::NoPen);
     painter.setBrush(QColor(44, 62, 80)); // رنگ نقاط
@@ -280,3 +334,70 @@ void DotsAndBoxesWidget::paintEvent(QPaintEvent* event)
         }
     }
 }
+=======
+    painter.setBrush(Qt::black);
+    painter.setPen(Qt::NoPen);
+    for (int r = 0; r <= rows; ++r) {
+        for (int c = 0; c <= cols; ++c) {
+            painter.drawEllipse(QPoint(m_margin + c * m_cellSize, m_margin + r * m_cellSize), m_dotRadius, m_dotRadius);
+        }
+    }
+}
+
+void DotsAndBoxesWidget::mousePressEvent(QMouseEvent *event)
+{
+    if (!m_game || m_game->isGameOver()) return;
+
+    int effectivePlayer = (m_myPlayer == -1) ? m_game->currentPlayer() : m_myPlayer;
+
+    if (effectivePlayer != m_game->currentPlayer()) return;
+
+    QPoint pos = event->pos();
+    int rows = m_game->getRows();
+    int cols = m_game->getCols();
+
+    for (int r = 0; r <= rows; ++r) {
+        for (int c = 0; c < cols; ++c) {
+            if (m_game->hasHLine(r, c)) continue;
+
+            int x = m_margin + c * m_cellSize;
+            int y = m_margin + r * m_cellSize;
+            QRect hitBox(x + m_dotRadius, y - m_hitRadius, m_cellSize - 2 * m_dotRadius, 2 * m_hitRadius);
+
+            if (hitBox.contains(pos)) {
+                QVariantMap move;
+                move["type"] = "H";
+                move["row"] = r;
+                move["col"] = c;
+
+                if (m_game->makeMove(effectivePlayer, move)) {
+                    emit moveReadyToSend(move);
+                }
+                return;
+            }
+        }
+    }
+
+    for (int r = 0; r < rows; ++r) {
+        for (int c = 0; c <= cols; ++c) {
+            if (m_game->hasVLine(r, c)) continue;
+
+            int x = m_margin + c * m_cellSize;
+            int y = m_margin + r * m_cellSize;
+            QRect hitBox(x - m_hitRadius, y + m_dotRadius, 2 * m_hitRadius, m_cellSize - 2 * m_dotRadius);
+
+            if (hitBox.contains(pos)) {
+                QVariantMap move;
+                move["type"] = "V";
+                move["row"] = r;
+                move["col"] = c;
+
+                if (m_game->makeMove(effectivePlayer, move)) {
+                    emit moveReadyToSend(move);
+                }
+                return;
+            }
+        }
+    }
+}
+>>>>>>> 60a91530bac12adf7d18b37c7237ef6391ae8288

@@ -2,6 +2,8 @@
 #include <QHostAddress>
 #include <QNetworkInterface>
 #include <QDebug>
+#include "../games/dotsandboxesgame.h"
+
 
 // ─────────────────────────────────────────────
 //  GameServer – Implementation
@@ -286,6 +288,14 @@ void GameServer::tryStartGame()
         m_room.players[1].username.isEmpty()) return;
 
     m_room.gameStarted  = true;
+    if (m_room.game) {
+        delete m_room.game;
+        m_room.game = nullptr;
+    }
+
+    if (m_room.settings.gameType == GameType::DOTS_AND_BOXES) {
+    m_room.game = new DotsAndBoxesGame();
+    }
     m_room.currentTurn  = 0;   // میزبان اول بازی می‌کنه
 
     QString p1 = m_room.players[0].username;

@@ -7,6 +7,7 @@ CONFIG += c++17
 HEADERS += \
     core/authmanager.h \
     core/storagemanager.h \
+    games/dotsandboxesgame.h \
     games/fanoronagame.h \
     games/game.h \
     games/ninemensmorrisgame.h \
@@ -32,6 +33,7 @@ HEADERS += \
 SOURCES += \
     core/authmanager.cpp \
     core/storagemanager.cpp \
+    games/dotsandboxesgame.cpp \
     games/fanoronagame.cpp \
     games/ninemensmorrisgame.cpp \
     main.cpp \
