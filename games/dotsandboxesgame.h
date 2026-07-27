@@ -5,46 +5,75 @@
 #include <QVector>
 #include <QVariantMap>
 
+// ─────────────────────────────────────────────
+// Dots and Boxes
+//
+// تخته: شبکه‌ای از نقاط به اندازه‌ی boardSize × boardSize
+// (boardSize از GameSettings میاد، بین ۶ تا ۸)
+//
+// خطوط:
+//   افقی  (hLines): boardSize ردیف × (boardSize-1) ستون
+//   عمودی (vLines): (boardSize-1) ردیف × boardSize ستون
+//
+// جعبه‌ها: (boardSize-1) × (boardSize-1) جعبه
+//   یه جعبه‌ی (row,col) وقتی کامل می‌شه که ۴ ضلع داشته باشه:
+//     - بالا : hLines[row][col]
+//     - پایین: hLines[row+1][col]
+//     - چپ  : vLines[row][col]
+//     - راست : vLines[row][col+1]
+//
+// وقتی بازیکنی با یه خط یه جعبه رو کامل می‌کنه، امتیاز
+// می‌گیره و دوباره حرکت می‌کنه (نوبتش تکرار می‌شه).
+//
+// نحوه‌ی استفاده از makeMove:
+//   {"isHorizontal": true,  "row": r, "col": c}  ← خط افقی
+//   {"isHorizontal": false, "row": r, "col": c}  ← خط عمودی
+// ─────────────────────────────────────────────
+
 class DotsAndBoxesGame : public Game
 {
     Q_OBJECT
-public:
-    // به‌طور پیش‌فرض بازی را ۵ در ۵ (مربع) در نظر می‌گیریم
-    explicit DotsAndBoxesGame(int boxRows = 5, int boxCols = 5, QObject *parent = nullptr);
 
-    // توابعی که از کلاس Game باید Override شوند
-    int currentPlayer() const override;
-    bool makeMove(int player, const QVariant& moveData) override;
-    bool isGameOver() const override;
-    int getWinner() const override;
+public:
+    explicit DotsAndBoxesGame(int boardSize = 6, QObject* parent = nullptr);
+
+    int     currentPlayer() const override;
+    bool    makeMove(int player, const QVariant& moveData) override;
+    bool    isGameOver() const override;
+    int     getWinner() const override;
     QVariant getBoardState() const override;
-    void resetGame() override;
+    void    resetGame() override;
     QString gameName() const override;
 
-    // توابع کمکی برای خواندن وضعیت برد جهت رسم در رابط کاربری
-    int getRows() const { return m_boxRows; }
-    int getCols() const { return m_boxCols; }
-    bool hasHLine(int r, int c) const { return (r >= 0 && r <= m_boxRows && c >= 0 && c < m_boxCols) ? m_hLines[r][c] : false; }
-    bool hasVLine(int r, int c) const { return (r >= 0 && r < m_boxRows && c >= 0 && c <= m_boxCols) ? m_vLines[r][c] : false; }
-    int boxOwner(int r, int c) const { return (r >= 0 && r < m_boxRows && c >= 0 && c < m_boxCols) ? m_boxes[r][c] : -1; }
-
+    int  boardSize() const { return m_boardSize; }
+    int  score(int player) const { return m_scores[player]; }
 
 private:
-    int m_boxRows;
-    int m_boxCols;
-    int m_currentPlayer; // 0 برای بازیکن اول، 1 برای بازیکن دوم
-    int m_winner;        // -2: در حال اجرا، -1: مساوی، 0: برد بازیکن اول، 1: برد بازیکن دوم
-    int m_score[2];      // امتیازات دو بازیکن
+    int  m_boardSize;      // تعداد نقطه در هر ضلع (مثلاً ۶)
+    int  m_N;              // = boardSize (برای کوتاهی)
 
-    // وضعیت خطوط افقی و عمودی (آیا کشیده شده‌اند یا نه؟)
-    QVector<QVector<bool>> m_hLines; // ابعاد: [boxRows + 1][boxCols]
-    QVector<QVector<bool>> m_vLines; // ابعاد: [boxRows][boxCols + 1]
+    // خطوط — true یعنی کشیده شده
+    QVector<QVector<bool>> m_hLines; // [row][col]: row در [0,N-1], col در [0,N-2]
+    QVector<QVector<bool>> m_vLines; // [row][col]: row در [0,N-2], col در [0,N-1]
 
-    // وضعیت خانه‌ها (-1: خالی، 0: مال بازیکن اول، 1: مال بازیکن دوم)
-    QVector<QVector<int>> m_boxes;   // ابعاد: [boxRows][boxCols]
+    // جعبه‌ها — 0=خالی، 1=بازیکن ۰، 2=بازیکن ۱
+    QVector<QVector<int>>  m_boxes;  // [row][col]: row,col در [0,N-2]
 
-    // تابع کمکی برای بررسی اینکه آیا پس از یک حرکت، خانه‌ای کامل شده است یا خیر
-    bool checkAndClaimBoxes(int r, int c, bool isHorizontal, int player);
+    int m_scores[2];
+    int m_currentPlayer;
+    int m_winner;          // -2=ادامه، -1=مساوی، 0/1=برنده
+
+    // ── توابع کمکی ──
+    bool isValidHLine(int row, int col) const;
+    bool isValidVLine(int row, int col) const;
+    bool isBoxComplete(int boxRow, int boxCol) const;
+
+    // چک می‌کنه آیا کشیدن یه خط باعث کامل شدن جعبه‌ای می‌شه
+    // و اگه شد، جعبه رو به player نسبت می‌ده و امتیاز می‌ده
+    // برمی‌گردونه تعداد جعبه‌های تازه کامل‌شده
+    int claimAdjacentBoxes(bool isHorizontal, int row, int col, int player);
+
+    void checkGameOver();
 };
 
 #endif // DOTSANDBOXESGAME_H

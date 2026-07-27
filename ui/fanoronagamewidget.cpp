@@ -147,8 +147,10 @@ QPoint FanoronaWidget::pointPosition(int index) const
     const int row = index / COLS;
     const int col = index % COLS;
 
-    const int marginX = 45;
-    const int topMargin = 38;const int statusH = 46;
+    const int marginX     = 45;
+    const int topBarH     = 36;
+    const int topMargin   = 38 + topBarH;
+    const int statusH     = 46;
     const int bottomMargin = statusH + 15;
 
     const int usableW = width()  - 2 * marginX;
@@ -177,11 +179,12 @@ void FanoronaWidget::drawBackground(QPainter& p) const
 {
     p.fillRect(rect(), BG_DARK);
 
-    const int margin = 20;
+    const int margin  = 20;
     const int statusH = 46;
-    QRect boardRect(margin, margin,
+    const int topBarH = 36;
+    QRect boardRect(margin, margin + topBarH,
                     width() - 2 * margin,
-                    height() - 2 * margin - statusH);
+                    height() - 2 * margin - statusH - topBarH);
 
     p.setPen(QPen(QColor(0x45, 0x47, 0x5a), 1));
     p.setBrush(BG_BOARD);
@@ -294,6 +297,13 @@ void FanoronaWidget::drawPieceCount(QPainter& p) const
         else if (item.toInt() == 2) countP2++;
     }
 
+    // نوار بالای صفحه — بالای تخته
+    const int topBarH = 36;
+    QRect topBar(0, 0, width(), topBarH);
+    p.fillRect(topBar, BG_STATUS);
+    p.setPen(QPen(QColor(0x31, 0x32, 0x44), 1));
+    p.drawLine(0, topBarH, width(), topBarH);
+
     QFont f = p.font();
     f.setPointSize(9);
     f.setBold(true);
@@ -301,12 +311,14 @@ void FanoronaWidget::drawPieceCount(QPainter& p) const
 
     // بازیکن ۱ (سمت چپ)
     p.setPen(PIECE_P0_A);
-    p.drawText(QRect(28, 8, 160, 20), Qt::AlignLeft,
+    p.drawText(QRect(28, 0, width() / 2 - 28, topBarH),
+               Qt::AlignVCenter | Qt::AlignLeft,
                QString("⬤ بازیکن ۱: %1 مهره").arg(countP1));
 
     // بازیکن ۲ (سمت راست)
     p.setPen(PIECE_P1_A);
-    p.drawText(QRect(width() - 188, 8, 160, 20), Qt::AlignRight,
+    p.drawText(QRect(width() / 2, 0, width() / 2 - 28, topBarH),
+               Qt::AlignVCenter | Qt::AlignRight,
                QString("⬤ بازیکن ۲: %1 مهره").arg(countP2));
 }
 
@@ -401,7 +413,7 @@ void FanoronaWidget::attemptMove(int from, int to)
         QVariantMap move;
         move["from"] = from;
         move["to"]   = to;
-    if (box.clickedButton() == approachBtn)
+        if (box.clickedButton() == approachBtn)
             move["captureType"] = "approach";
         else if (box.clickedButton() == withdrawalBtn)
             move["captureType"] = "withdrawal";

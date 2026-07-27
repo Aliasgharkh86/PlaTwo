@@ -53,6 +53,16 @@ void GameClient::connectToServer(const QString& serverIP,
     m_socket->connectToHost(serverIP, static_cast<quint16>(port));
 }
 
+void GameClient::sendGameOver(const QString& winner)
+{
+    if (!isConnected()) return;
+    GameMessage msg;
+    msg.type = MessageType::GAME_OVER;
+    msg.data["winner"] = winner;
+    msg.data["reason"] = "normal";
+    sendMessage(msg);
+}
+
 void GameClient::disconnectFromServer()
 {
     m_intentionalDisconnect = true;

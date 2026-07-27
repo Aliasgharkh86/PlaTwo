@@ -1,138 +1,180 @@
 #include "dotsandboxesgame.h"
 
-DotsAndBoxesGame::DotsAndBoxesGame(int boxRows, int boxCols, QObject *parent)
-    : Game(parent), m_boxRows(boxRows), m_boxCols(boxCols)
+DotsAndBoxesGame::DotsAndBoxesGame(int boardSize, QObject* parent)
+    : Game(parent)
+    , m_boardSize(boardSize)
+    , m_N(boardSize)
 {
     resetGame();
 }
 
 void DotsAndBoxesGame::resetGame()
 {
-    m_currentPlayer = 0;
-    m_winner = -2;
-    m_score[0] = 0;
-    m_score[1] = 0;
+    // مقداردهی اولیه‌ی خطوط — همه false (کشیده‌نشده)
+    m_hLines.assign(m_N,     QVector<bool>(m_N - 1, false));
+    m_vLines.assign(m_N - 1, QVector<bool>(m_N,     false));
+    m_boxes .assign(m_N - 1, QVector<int> (m_N - 1, 0));
 
-    m_hLines.assign(m_boxRows + 1, QVector<bool>(m_boxCols, false));
-    m_vLines.assign(m_boxRows, QVector<bool>(m_boxCols + 1, false));
-    m_boxes.assign(m_boxRows, QVector<int>(m_boxCols, -1));
+    m_scores[0]   = 0;
+    m_scores[1]   = 0;
+    m_currentPlayer = 0;
+    m_winner        = -2;
 
     emit boardChanged();
 }
 
-int DotsAndBoxesGame::currentPlayer() const
-{
-    return m_currentPlayer;
-}
-
-bool DotsAndBoxesGame::isGameOver() const
-{
-    return m_winner != -2;
-}
-
-int DotsAndBoxesGame::getWinner() const
-{
-    return m_winner;
-}
-
-QString DotsAndBoxesGame::gameName() const
-{
-    return "Dots and Boxes";
-}
+int DotsAndBoxesGame::currentPlayer() const { return m_currentPlayer; }
+QString DotsAndBoxesGame::gameName() const  { return "Dots and Boxes"; }
+bool DotsAndBoxesGame::isGameOver() const   { return m_winner != -2; }
+int DotsAndBoxesGame::getWinner() const     { return m_winner; }
 
 QVariant DotsAndBoxesGame::getBoardState() const
 {
-    // ارسال وضعیت کلی برای همگام‌سازی (در صورت نیاز)
+    // خطوط افقی
+    QVariantList hList;
+    for (int r = 0; r < m_N; ++r)
+        for (int c = 0; c < m_N - 1; ++c)
+            hList.append(m_hLines[r][c]);
+
+    // خطوط عمودی
+    QVariantList vList;
+    for (int r = 0; r < m_N - 1; ++r)
+        for (int c = 0; c < m_N; ++c)
+            vList.append(m_vLines[r][c]);
+
+    // جعبه‌ها
+    QVariantList boxList;
+    for (int r = 0; r < m_N - 1; ++r)
+        for (int c = 0; c < m_N - 1; ++c)
+            boxList.append(m_boxes[r][c]);
+
     QVariantMap state;
+    state["boardSize"]     = m_boardSize;
+    state["hLines"]        = hList;
+    state["vLines"]        = vList;
+    state["boxes"]         = boxList;
+    state["score0"]        = m_scores[0];
+    state["score1"]        = m_scores[1];
     state["currentPlayer"] = m_currentPlayer;
-    state["score0"] = m_score[0];
-    state["score1"] = m_score[1];
     return state;
 }
 
-bool DotsAndBoxesGame::makeMove(int player, const QVariant& moveData)
+// ── اعتبارسنجی ────────────────────────────────
+
+bool DotsAndBoxesGame::isValidHLine(int row, int col) const
 {
-    if (isGameOver() || player != m_currentPlayer) return false;
-
-    QVariantMap map = moveData.toMap();
-    QString type = map["type"].toString(); // "H" برای افقی, "V" برای عمودی
-    int r = map["row"].toInt();
-    int c = map["col"].toInt();
-
-    bool isValidMove = false;
-
-    if (type == "H" && r >= 0 && r <= m_boxRows && c >= 0 && c < m_boxCols) {
-        if (!m_hLines[r][c]) {
-            m_hLines[r][c] = true;
-            isValidMove = true;
-        }
-    } else if (type == "V" && r >= 0 && r < m_boxRows && c >= 0 && c <= m_boxCols) {
-        if (!m_vLines[r][c]) {
-            m_vLines[r][c] = true;
-            isValidMove = true;
-        }
-    }
-
-    if (!isValidMove) return false;
-
-    // بررسی اینکه آیا خانه‌ای گرفته شده است؟
-    bool boxClaimed = checkAndClaimBoxes(r, c, type == "H", player);
-
-    // اگر خانه‌ای نگرفت، نوبت به حریف می‌رسد
-    if (!boxClaimed) {
-        m_currentPlayer = (m_currentPlayer == 0) ? 1 : 0;
-    }
-
-    // بررسی پایان بازی
-    if (m_score[0] + m_score[1] == m_boxRows * m_boxCols) {
-        if (m_score[0] > m_score[1]) m_winner = 0;
-        else if (m_score[1] > m_score[0]) m_winner = 1;
-        else m_winner = -1; // مساوی
-
-        emit boardChanged();
-        emit gameEnded(m_winner);
-    } else {
-        emit boardChanged();
-    }
-
-    return true;
+    return row >= 0 && row < m_N && col >= 0 && col < m_N - 1;
 }
 
-bool DotsAndBoxesGame::checkAndClaimBoxes(int r, int c, bool isHorizontal, int player)
+bool DotsAndBoxesGame::isValidVLine(int row, int col) const
 {
-    bool claimed = false;
+    return row >= 0 && row < m_N - 1 && col >= 0 && col < m_N;
+}
 
-    auto isBoxComplete = [&](int br, int bc) {
-        if (br < 0 || br >= m_boxRows || bc < 0 || bc >= m_boxCols) return false;
-        return m_hLines[br][bc] && m_hLines[br+1][bc] && m_vLines[br][bc] && m_vLines[br][bc+1];
-    };
+bool DotsAndBoxesGame::isBoxComplete(int boxRow, int boxCol) const
+{
+    return m_hLines[boxRow    ][boxCol] &&   // بالا
+           m_hLines[boxRow + 1][boxCol] &&   // پایین
+           m_vLines[boxRow    ][boxCol] &&   // چپ
+           m_vLines[boxRow    ][boxCol + 1]; // راست
+}
 
-    // اگر خط افقی کشیده شده، حداکثر دو خانه بالا و پایین آن ممکن است کامل شوند
+// ── کامل کردن جعبه‌های مجاور ─────────────────
+
+int DotsAndBoxesGame::claimAdjacentBoxes(bool isHorizontal,
+                                         int row, int col, int player)
+{
+    int claimed = 0;
+
     if (isHorizontal) {
-        if (isBoxComplete(r - 1, c) && m_boxes[r - 1][c] == -1) {
-            m_boxes[r - 1][c] = player;
-            m_score[player]++;
-            claimed = true;
+        // یه خط افقی در (row, col) می‌تونه دو جعبه رو کامل کنه:
+        //   جعبه‌ی بالا: (row-1, col) — اگه row > 0
+        //   جعبه‌ی پایین: (row, col) — اگه row < N-1
+        if (row > 0 && isBoxComplete(row - 1, col)) {
+            m_boxes[row - 1][col] = player + 1;
+            m_scores[player]++;
+            claimed++;
         }
-        if (isBoxComplete(r, c) && m_boxes[r][c] == -1) {
-            m_boxes[r][c] = player;
-            m_score[player]++;
-            claimed = true;
+        if (row < m_N - 1 && isBoxComplete(row, col)) {
+            m_boxes[row][col] = player + 1;
+            m_scores[player]++;
+            claimed++;
         }
-    }
-    // اگر خط عمودی کشیده شده، حداکثر دو خانه چپ و راست آن ممکن است کامل شوند
-    else {
-        if (isBoxComplete(r, c - 1) && m_boxes[r][c - 1] == -1) {
-            m_boxes[r][c - 1] = player;
-            m_score[player]++;
-            claimed = true;
+    } else {
+        // یه خط عمودی در (row, col) می‌تونه دو جعبه رو کامل کنه:
+        //   جعبه‌ی چپ:  (row, col-1) — اگه col > 0
+        //   جعبه‌ی راست: (row, col) — اگه col < N-1
+        if (col > 0 && isBoxComplete(row, col - 1)) {
+            m_boxes[row][col - 1] = player + 1;
+            m_scores[player]++;
+            claimed++;
         }
-        if (isBoxComplete(r, c) && m_boxes[r][c] == -1) {
-            m_boxes[r][c] = player;
-            m_score[player]++;
-            claimed = true;
+        if (col < m_N - 1 && isBoxComplete(row, col)) {
+            m_boxes[row][col] = player + 1;
+            m_scores[player]++;
+            claimed++;
         }
     }
 
     return claimed;
+}
+
+void DotsAndBoxesGame::checkGameOver()
+{
+    // بازی تموم می‌شه وقتی همه‌ی جعبه‌ها صاحب داشته باشن
+    const int totalBoxes = (m_N - 1) * (m_N - 1);
+    if (m_scores[0] + m_scores[1] < totalBoxes)
+        return;
+
+    if (m_scores[0] > m_scores[1])
+        m_winner = 0;
+    else if (m_scores[1] > m_scores[0])
+        m_winner = 1;
+    else
+        m_winner = -1; // مساوی
+
+    emit gameEnded(m_winner);
+}
+
+// ── makeMove ──────────────────────────────────
+
+bool DotsAndBoxesGame::makeMove(int player, const QVariant& moveData)
+{
+    if (isGameOver())         return false;
+    if (player != m_currentPlayer) return false;
+
+    const QVariantMap data = moveData.toMap();
+    if (!data.contains("isHorizontal") ||
+        !data.contains("row") ||
+        !data.contains("col"))
+        return false;
+
+    const bool isHorizontal = data.value("isHorizontal").toBool();
+    const int  row          = data.value("row").toInt();
+    const int  col          = data.value("col").toInt();
+
+    if (isHorizontal) {
+        if (!isValidHLine(row, col))        return false;
+        if (m_hLines[row][col])             return false; // قبلاً کشیده شده
+        m_hLines[row][col] = true;
+    } else {
+        if (!isValidVLine(row, col))        return false;
+        if (m_vLines[row][col])             return false;
+        m_vLines[row][col] = true;
+    }
+
+    // چک کن آیا جعبه‌ای کامل شد
+    const int boxesClaimed = claimAdjacentBoxes(isHorizontal, row, col, player);
+
+    checkGameOver();
+
+    if (!isGameOver()) {
+        // اگه جعبه‌ای کامل نشد → نوبت عوض می‌شه
+        // اگه جعبه‌ای کامل شد → همون بازیکن دوباره حرکت می‌کنه
+        if (boxesClaimed == 0)
+            m_currentPlayer = 1 - m_currentPlayer;
+    }
+
+    emit boardChanged();
+    return true;
 }

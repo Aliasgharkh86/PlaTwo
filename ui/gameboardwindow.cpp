@@ -56,6 +56,11 @@ GameBoardWindow::GameBoardWindow(Game* game, QWidget* boardWidget, GameClient* c
 
     // دکمه‌ی بازگشت
     auto* backBtn = new QPushButton("بازگشت به منو", this);
+    backBtn->setStyleSheet(
+        "QPushButton { background-color: #4a90e2; color: white; border-radius: 6px;"
+        "              padding: 8px 20px; font-weight: bold; font-size: 11pt; }"
+        "QPushButton:hover   { background-color: #3a80d2; }"
+        "QPushButton:pressed { background-color: #2a70c2; }");
     leftLayout->addWidget(backBtn);
 
     rootLayout->addLayout(leftLayout, 1);
@@ -67,6 +72,23 @@ GameBoardWindow::GameBoardWindow(Game* game, QWidget* boardWidget, GameClient* c
         rootLayout->addWidget(m_chatWidget);
     }
 
+    // ── وقتی بازی روی کلاینت تموم شد، به سرور اطلاع بده ──
+    if (m_game && m_client) {
+        connect(m_game, &Game::gameEnded, this, [this](int winnerSlot) {
+            // فقط host (player 0) نتیجه رو به سرور می‌فرسته تا دوبار نفرستیم
+            if (m_myPlayer != 0) return;
+
+            QString winnerUsername;
+            if (winnerSlot == 0)
+                winnerUsername = m_currentUser.username;
+            else if (winnerSlot == 1)
+                winnerUsername = m_opponentUsername;
+            else
+                winnerUsername = ""; // مساوی
+
+            m_client->sendGameOver(winnerUsername);
+        });
+    }
     // ── connects ────────────────────────────────
     connect(backBtn, &QPushButton::clicked,
             this, &GameBoardWindow::backToMenuRequested);

@@ -35,6 +35,8 @@ public:
     // ارسال پیام چت (امتیازی)
     void sendChat(const QString& text);
 
+    void sendGameOver(const QString& winner);
+
     // وضعیت اتصال
     bool isConnected() const;
 

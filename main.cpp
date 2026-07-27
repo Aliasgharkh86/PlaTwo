@@ -44,15 +44,11 @@ static GameBoardWindow* createBoardWindow(const QString& gameTypeStr,
     QWidget* boardWidget = nullptr;
 
     if (gameTypeStr == "dots_and_boxes") {
-        int size = (boardSize >= 6 && boardSize <= 8) ? boardSize : 6;
-        auto* g = new DotsAndBoxesGame(size, size, parent);
 
-        QString p1Name = (myPlayer == 0) ? currentUser.username : opponentUsername;
-        QString p2Name = (myPlayer == 0) ? opponentUsername : currentUser.username;
-
-        auto* w = new DotsAndBoxesWidget(g, myPlayer, p1Name, p2Name);
-        game        = g;
-        boardWidget = w;
+        auto* g = new DotsAndBoxesGame(boardSize, parent);
+        auto* w = new DotsAndBoxesWidget(g, myPlayer);
+        // connects شبکه...
+        game = g; boardWidget = w;
     }
     else if (gameTypeStr == "nine_mens_morris") {
         auto* g = new NineMensMorrisGame(parent);
@@ -143,7 +139,8 @@ int main(int argc, char* argv[])
                                      Q_UNUSED(hasTimer) Q_UNUSED(timerSecs)
 
                                      const int myPlayer = lobby->isHost() ? 0 : 1;
-                                     const QString opponentUsername = (myPlayer == 0) ? p2 : p1;
+                                     const QString myUsername = client->username();
+                                     const QString opponentUsername = (myUsername == p1) ? p2 : p1;
 
                                      auto* board = createBoardWindow(gameTypeStr, client, myPlayer,
                                                                      user, opponentUsername, boardSize);

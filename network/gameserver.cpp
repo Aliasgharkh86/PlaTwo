@@ -196,6 +196,12 @@ void GameServer::handleMessage(QTcpSocket* sender, const GameMessage& msg)
     case MessageType::CHAT_MESSAGE:
         handleChat(sender, msg.data);
         break;
+    case MessageType::GAME_OVER:
+        if (m_room.gameStarted) {
+            QString winner = msg.data["winner"].toString();
+            endGame(winner, "normal");
+        }
+        break;
     default:
         emit logMessage("پیام ناشناخته از کلاینت.");
         break;
@@ -237,8 +243,20 @@ void GameServer::handleMove(QTcpSocket* socket, const QJsonObject& data)
     // ── اعتبارسنجی حرکت ──────────────────────
     // TODO: اینجا منطق بازی رو plug کن
     // فعلاً هر حرکتی رو قبول می‌کنیم (برای تست شبکه)
-    bool valid = true;
-
+    bool valid = false;
+    if (m_room.game) {
+        // extra حاوی JSON هست مثلاً {"isHorizontal": true, "row": 1, "col": 2}
+        QJsonDocument doc = QJsonDocument::fromJson(extra.toUtf8());
+        QVariantMap moveData;
+        if (!doc.isNull() && doc.isObject()) {
+            moveData = doc.object().toVariantMap();
+        } else {
+            // fallback: از row/col مستقیم استفاده کن
+            moveData["row"] = row;
+            moveData["col"] = col;
+        }
+        valid = m_room.game->makeMove(slot, QVariant(moveData));
+    }
     // نتیجه رو به فرستنده بده
     GameMessage result;
     result.type         = MessageType::MOVE_RESULT;

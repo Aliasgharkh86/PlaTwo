@@ -115,12 +115,13 @@ bool NineMensMorrisWidget::isMyTurn() const
 QPoint NineMensMorrisWidget::pointPosition(int index) const
 {
     const GridPos g = gridPositions()[index];
-    const int margin = 50;
+    const int margin  = 50;
+    const int topBarH = 36;
     const int usableW = width()  - 2 * margin;
-    const int usableH = height() - 2 * margin - 52;
+    const int usableH = height() - 2 * margin - 52 - topBarH;
 
     const int x = margin + (g.col * usableW) / 6;
-    const int y = margin + (g.row * usableH) / 6;
+    const int y = margin + topBarH + (g.row * usableH) / 6;
     return QPoint(x, y);
 }
 
@@ -144,12 +145,13 @@ void NineMensMorrisWidget::drawBackground(QPainter& p) const
     // پس‌زمینه‌ی اصلی
     p.fillRect(rect(), BG_DARK);
 
-    // ناحیه‌ی تخته با گوشه‌های گرد
-    const int margin = 30;
+    // ناحیه‌ی تخته با گوشه‌های گرد — پایین‌تر از نوار امتیاز
+    const int margin  = 30;
     const int statusH = 52;
-    QRect boardRect(margin, margin,
+    const int topBarH = 36;
+    QRect boardRect(margin, margin + topBarH,
                     width() - 2*margin,
-                    height() - 2*margin - statusH);
+                    height() - 2*margin - statusH - topBarH);
 
     p.setPen(QPen(QColor(0x45, 0x47, 0x5a), 1));
     p.setBrush(BG_BOARD);
@@ -277,19 +279,29 @@ void NineMensMorrisWidget::drawPieceCount(QPainter& p) const
     const int p0Board = state.value("piecesOnBoard0").toInt();
     const int p1Board = state.value("piecesOnBoard1").toInt();
 
+    // نوار بالای صفحه — بالای تخته
+    const int topBarH = 36;
+    QRect topBar(0, 0, width(), topBarH);
+    p.fillRect(topBar, BG_STATUS);
+    p.setPen(QPen(QColor(0x31, 0x32, 0x44), 1));
+    p.drawLine(0, topBarH, width(), topBarH);
+
     QFont f = p.font();
     f.setPointSize(9);
+    f.setBold(true);
     p.setFont(f);
 
-    // بازیکن ۰ — گوشه‌ی بالا چپ
+    // بازیکن ۰ — چپ
     p.setPen(PIECE_P0_A);
-    p.drawText(QRect(10, 8, 150, 20), Qt::AlignLeft,
+    p.drawText(QRect(10, 0, width() / 2 - 10, topBarH),
+               Qt::AlignVCenter | Qt::AlignLeft,
                QString("⬤ بازیکن ۱  روی تخته: %1  مانده: %2")
                    .arg(p0Board).arg(p0Place));
 
-    // بازیکن ۱ — گوشه‌ی بالا راست
+    // بازیکن ۱ — راست
     p.setPen(PIECE_P1_A);
-    p.drawText(QRect(width() - 160, 8, 150, 20), Qt::AlignRight,
+    p.drawText(QRect(width() / 2, 0, width() / 2 - 10, topBarH),
+               Qt::AlignVCenter | Qt::AlignRight,
                QString("⬤ بازیکن ۲  روی تخته: %1  مانده: %2")
                    .arg(p1Board).arg(p1Place));
 }

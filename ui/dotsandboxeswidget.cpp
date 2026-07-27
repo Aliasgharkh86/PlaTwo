@@ -1,403 +1,384 @@
 #include "dotsandboxeswidget.h"
+
 #include <QPainter>
-<<<<<<< HEAD
-#include <QPainterPath>
+#include <QMouseEvent>
+#include <QVariantMap>
 #include <cmath>
 
-DotsAndBoxesWidget::DotsAndBoxesWidget(DotsAndBoxesGame* game, int myPlayer, const QString& player1Name, const QString& player2Name, QWidget* parent)
-    : QWidget(parent)
-    , m_game(game)
-    , m_myPlayer(myPlayer)
-    , m_player1Name(player1Name)
-    , m_player2Name(player2Name)
-{
-    // فعال‌سازی تعقیب موش برای افکت Hover بدون نیاز به فشردن کلیک
-    setMouseTracking(true);
-
-    if (m_game) {
-        // بازپاشی صفحه به محض تغییر وضعیت بازی
-        connect(m_game, &Game::boardChanged, this, [this]() {
-=======
-#include <QMouseEvent>
-
-DotsAndBoxesWidget::DotsAndBoxesWidget(DotsAndBoxesGame* game, int myPlayer, QWidget *parent)
-    : QWidget(parent), m_game(game), m_myPlayer(myPlayer),
-    m_cellSize(60), m_margin(50), m_dotRadius(6), m_lineThickness(8), m_hitRadius(15)
-{
-    if (m_game) {
-        int w = 2 * m_margin + m_game->getCols() * m_cellSize;
-        int h = 2 * m_margin + m_game->getRows() * m_cellSize;
-        setMinimumSize(w, h);
-
-        connect(m_game, &Game::boardChanged, this, [this](){
->>>>>>> 60a91530bac12adf7d18b37c7237ef6391ae8288
-            update();
-        });
-    }
+// ── رنگ‌های تم ────────────────────────────────
+namespace {
+const QColor BG_DARK   {0x1e, 0x1e, 0x2e};
+const QColor BG_BOARD  {0x28, 0x28, 0x3a};
+const QColor BG_STATUS {0x18, 0x18, 0x25};
+const QColor DOT_COLOR {0xcd, 0xd6, 0xf4};
+const QColor LINE_DRAWN{0x58, 0x5b, 0x70};
+const QColor LINE_EMPTY{0x31, 0x32, 0x44};
+const QColor P0_COLOR  {0x89, 0xb4, 0xfa}; // آبی
+const QColor P1_COLOR  {0xf3, 0x8b, 0xa8}; // قرمز
+const QColor BOX_P0    {0x89, 0xb4, 0xfa, 60};
+const QColor BOX_P1    {0xf3, 0x8b, 0xa8, 60};
+const QColor HOVER_P0  {0x89, 0xb4, 0xfa, 180};
+const QColor HOVER_P1  {0xf3, 0x8b, 0xa8, 180};
+const QColor TEXT_MAIN {0xcd, 0xd6, 0xf4};
+const QColor TEXT_DIM  {0x6c, 0x70, 0x86};
 }
 
-<<<<<<< HEAD
-void DotsAndBoxesWidget::setPlayerNames(const QString& p1Name, const QString& p2Name)
+// ── Constructors ──────────────────────────────
+
+DotsAndBoxesWidget::DotsAndBoxesWidget(QWidget* parent)
+    : QWidget(parent)
 {
-    m_player1Name = p1Name;
-    m_player2Name = p2Name;
+    setMinimumSize(400, 440);
+    setMouseTracking(true);
+}
+
+DotsAndBoxesWidget::DotsAndBoxesWidget(DotsAndBoxesGame* game,
+                                       int myPlayer,
+                                       QWidget* parent)
+    : DotsAndBoxesWidget(parent)
+{
+    setGame(game, myPlayer);
+}
+
+void DotsAndBoxesWidget::setGame(DotsAndBoxesGame* game, int myPlayer)
+{
+    if (m_game) m_game->disconnect(this);
+
+    m_game     = game;
+    m_myPlayer = myPlayer;
+    m_hoverRow = -1;
+    m_hoverCol = -1;
+
+    connect(m_game, &Game::boardChanged, this, &DotsAndBoxesWidget::onBoardChanged);
+    connect(m_game, &Game::gameEnded,    this, &DotsAndBoxesWidget::onGameEnded);
     update();
 }
 
+void DotsAndBoxesWidget::onBoardChanged() { update(); }
+void DotsAndBoxesWidget::onGameEnded(int) { m_hoverRow = -1; update(); }
+
 bool DotsAndBoxesWidget::isMyTurn() const
 {
-    if (!m_game) return false;
-    if (m_myPlayer == -1) return true; // حالت تست محلی
+    if (!m_game || m_game->isGameOver()) return false;
+    if (m_myPlayer == -1) return true;
     return m_game->currentPlayer() == m_myPlayer;
 }
 
-void DotsAndBoxesWidget::leaveEvent(QEvent* event)
+// ── هندسه ─────────────────────────────────────
+
+int DotsAndBoxesWidget::cellSize() const
 {
-    Q_UNUSED(event);
-    if (m_hoveredLine.valid) {
-        m_hoveredLine.valid = false;
-        update();
-    }
+    if (!m_game) return 50;
+    const int N    = m_game->boardSize();
+    const int statusH = 80;
+    const int margin  = 40;
+    const int available = qMin(width(), height() - statusH) - 2 * margin;
+    return qMax(20, available / (N - 1));
 }
+
+QPoint DotsAndBoxesWidget::dotPosition(int row, int col) const
+{
+    const int N    = m_game ? m_game->boardSize() : 6;
+    const int cs   = cellSize();
+    const int totalW = cs * (N - 1);
+    const int totalH = cs * (N - 1);
+    const int offX = (width()  - totalW) / 2;
+    const int topBarH = 36;
+    const int offY = (height() - totalH - 70) / 2 + topBarH / 2;
+    return QPoint(offX + col * cs, offY + row * cs);
+}
+
+// ── تشخیص نزدیک‌ترین خط به موس ───────────────
+
+bool DotsAndBoxesWidget::nearestLine(const QPoint& pos,
+                                     bool& outIsH,
+                                     int&  outRow,
+                                     int&  outCol) const
+{
+    if (!m_game) return false;
+    const int N         = m_game->boardSize();
+    const int threshold = cellSize() / 2;
+
+    double bestDist = threshold + 1;
+    bool   found    = false;
+
+    // خطوط افقی
+    for (int r = 0; r < N; ++r) {
+        for (int c = 0; c < N - 1; ++c) {
+            const QPoint a = dotPosition(r, c);
+            const QPoint b = dotPosition(r, c + 1);
+            const QPoint mid((a.x() + b.x()) / 2, (a.y() + b.y()) / 2);
+            const double d = std::hypot(pos.x() - mid.x(), pos.y() - mid.y());
+            if (d < bestDist) {
+                bestDist = d; outIsH = true;
+                outRow = r; outCol = c; found = true;
+            }
+        }
+    }
+
+    // خطوط عمودی
+    for (int r = 0; r < N - 1; ++r) {
+        for (int c = 0; c < N; ++c) {
+            const QPoint a = dotPosition(r, c);
+            const QPoint b = dotPosition(r + 1, c);
+            const QPoint mid((a.x() + b.x()) / 2, (a.y() + b.y()) / 2);
+            const double d = std::hypot(pos.x() - mid.x(), pos.y() - mid.y());
+            if (d < bestDist) {
+                bestDist = d; outIsH = false;
+                outRow = r; outCol = c; found = true;
+            }
+        }
+    }
+    return found;
+}
+
+// ── رویدادهای ماوس ────────────────────────────
 
 void DotsAndBoxesWidget::mouseMoveEvent(QMouseEvent* event)
 {
-    if (!isMyTurn() || !m_game || m_game->isGameOver()) {
-        if (m_hoveredLine.valid) {
-            m_hoveredLine.valid = false;
-            update();
-        }
-        return;
-    }
+    if (!isMyTurn()) { m_hoverRow = -1; update(); return; }
 
-    LineHoverInfo currentHover = hitTestLine(event->pos());
-    if (currentHover.valid != m_hoveredLine.valid ||
-        currentHover.type != m_hoveredLine.type ||
-        currentHover.row != m_hoveredLine.row ||
-        currentHover.col != m_hoveredLine.col)
-    {
-        m_hoveredLine = currentHover;
-        update();
+    bool isH; int r, c;
+    if (nearestLine(event->pos(), isH, r, c)) {
+        // فقط خط‌های کشیده‌نشده رو هایلایت کن
+        const QVariantMap state = m_game->getBoardState().toMap();
+        const int N = m_game->boardSize();
+        bool already = false;
+        if (isH) {
+            int idx = r * (N - 1) + c;
+            already = state.value("hLines").toList().at(idx).toBool();
+        } else {
+            int idx = r * N + c;
+            already = state.value("vLines").toList().at(idx).toBool();
+        }
+        if (!already) {
+            m_hoverIsHorizontal = isH;
+            m_hoverRow = r; m_hoverCol = c;
+            update(); return;
+        }
     }
+    m_hoverRow = -1;
+    update();
 }
 
 void DotsAndBoxesWidget::mousePressEvent(QMouseEvent* event)
 {
-    if (!m_game || !isMyTurn() || m_game->isGameOver())
-        return;
+    if (!isMyTurn() || m_hoverRow == -1) return;
 
-    const int effectivePlayer = (m_myPlayer == -1) ? m_game->currentPlayer() : m_myPlayer;
-    LineHoverInfo line = hitTestLine(event->pos());
+    const int effectivePlayer = (m_myPlayer == -1)
+                                    ? m_game->currentPlayer()
+                                    : m_myPlayer;
 
-    if (line.valid) {
-        QVariantMap moveData;
-        moveData["type"] = line.type;
-        moveData["row"]  = line.row;
-        moveData["col"]  = line.col;
+    QVariantMap move;
+    move["isHorizontal"] = m_hoverIsHorizontal;
+    move["row"]          = m_hoverRow;
+    move["col"]          = m_hoverCol;
 
-        if (m_game->makeMove(effectivePlayer, moveData)) {
-            m_hoveredLine.valid = false;
-            emit moveReadyToSend(moveData);
+    if (m_game->makeMove(effectivePlayer, move))
+        emit moveReadyToSend(move);
+
+    m_hoverRow = -1;
+    update();
+}
+
+void DotsAndBoxesWidget::leaveEvent(QEvent*)
+{
+    m_hoverRow = -1;
+    update();
+}
+
+// ── رسم ──────────────────────────────────────
+
+void DotsAndBoxesWidget::drawBackground(QPainter& p) const
+{
+    p.fillRect(rect(), BG_DARK);
+
+    const int statusH = 70;
+    const int topBarH = 36;
+    QRect boardRect(20, 20 + topBarH, width() - 40, height() - 40 - statusH - topBarH);
+    p.setPen(QPen(QColor(0x45, 0x47, 0x5a), 1));
+    p.setBrush(BG_BOARD);
+    p.drawRoundedRect(boardRect, 12, 12);
+}
+
+void DotsAndBoxesWidget::drawBoxes(QPainter& p) const
+{
+    if (!m_game) return;
+    const QVariantMap state = m_game->getBoardState().toMap();
+    const QVariantList boxes = state.value("boxes").toList();
+    const int N = m_game->boardSize();
+
+    for (int r = 0; r < N - 1; ++r) {
+        for (int c = 0; c < N - 1; ++c) {
+            const int owner = boxes.at(r * (N - 1) + c).toInt();
+            if (owner == 0) continue;
+
+            const QPoint tl = dotPosition(r, c);
+            const QPoint br = dotPosition(r + 1, c + 1);
+            const QRect boxRect(tl, br);
+
+            // رنگ جعبه
+            p.setPen(Qt::NoPen);
+            p.setBrush(owner == 1 ? BOX_P0 : BOX_P1);
+            p.drawRect(boxRect);
+
+            // حرف بازیکن وسط جعبه
+            p.setPen(owner == 1 ? P0_COLOR : P1_COLOR);
+            QFont f = p.font();
+            f.setPointSize(10);
+            f.setBold(true);
+            p.setFont(f);
+            p.drawText(boxRect, Qt::AlignCenter,
+                       owner == 1 ? "A" : "B");
         }
-        update();
     }
 }
 
-DotsAndBoxesWidget::LineHoverInfo DotsAndBoxesWidget::hitTestLine(const QPoint& pos) const
+void DotsAndBoxesWidget::drawLines(QPainter& p) const
 {
-    LineHoverInfo info;
-    info.valid = false;
+    if (!m_game) return;
+    const QVariantMap state  = m_game->getBoardState().toMap();
+    const QVariantList hList = state.value("hLines").toList();
+    const QVariantList vList = state.value("vLines").toList();
+    const int N = m_game->boardSize();
 
-    if (!m_game) return info;
-
-    int pRows = m_game->pointRows();
-    int pCols = m_game->pointCols();
-    QVariantMap state = m_game->getBoardState().toMap();
-    QVariantList hLines = state["hLines"].toList();
-    QVariantList vLines = state["vLines"].toList();
-
-    double margin = 50.0;
-    double boardW = width() - 2 * margin;
-    double boardH = height() - 2 * margin;
-
-    if (boardW <= 0 || boardH <= 0) return info;
-
-    double cellW = boardW / (pCols - 1);
-    double cellH = boardH / (pRows - 1);
-
-    double minDistance = 18.0; // شعاع تشخیص کلیک/هاور حول خط به پیکسل
-
-    // ۱. بررسی خطوط افقی
-    for (int r = 0; r < pRows; ++r) {
-        QVariantList rowList = hLines[r].toList();
-        for (int c = 0; c < pCols - 1; ++c) {
-            if (rowList[c].toBool()) continue; // قبلاً رسم شده است
-
-            double x1 = margin + c * cellW;
-            double x2 = margin + (c + 1) * cellW;
-            double y  = margin + r * cellH;
-
-            if (pos.x() >= x1 - 5 && pos.x() <= x2 + 5) {
-                double dist = std::abs(pos.y() - y);
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    info.type = "h";
-                    info.row = r;
-                    info.col = c;
-                    info.valid = true;
-                }
-            }
+    // خطوط افقی
+    for (int r = 0; r < N; ++r) {
+        for (int c = 0; c < N - 1; ++c) {
+            const bool drawn = hList.at(r * (N - 1) + c).toBool();
+            p.setPen(QPen(drawn ? LINE_DRAWN : LINE_EMPTY,
+                          drawn ? 3.0 : 1.5,
+                          drawn ? Qt::SolidLine : Qt::DotLine,
+                          Qt::RoundCap));
+            p.drawLine(dotPosition(r, c), dotPosition(r, c + 1));
         }
     }
 
-    // ۲. بررسی خطوط عمودی
-    for (int r = 0; r < pRows - 1; ++r) {
-        QVariantList rowList = vLines[r].toList();
-        for (int c = 0; c < pCols; ++c) {
-            if (rowList[c].toBool()) continue; // قبلاً رسم شده است
-            double x  = margin + c * cellW;
-            double y1 = margin + r * cellH;
-            double y2 = margin + (r + 1) * cellH;
-
-            if (pos.y() >= y1 - 5 && pos.y() <= y2 + 5) {
-                double dist = std::abs(pos.x() - x);
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    info.type = "v";
-                    info.row = r;
-                    info.col = c;
-                    info.valid = true;
-                }
-            }
+    // خطوط عمودی
+    for (int r = 0; r < N - 1; ++r) {
+        for (int c = 0; c < N; ++c) {
+            const bool drawn = vList.at(r * N + c).toBool();
+            p.setPen(QPen(drawn ? LINE_DRAWN : LINE_EMPTY,
+                          drawn ? 3.0 : 1.5,
+                          drawn ? Qt::SolidLine : Qt::DotLine,
+                          Qt::RoundCap));
+            p.drawLine(dotPosition(r, c), dotPosition(r + 1, c));
         }
     }
+}
 
-    return info;
+void DotsAndBoxesWidget::drawHover(QPainter& p) const
+{
+    if (m_hoverRow < 0 || !m_game) return;
+
+    const QColor hoverColor = (m_game->currentPlayer() == 0) ? HOVER_P0 : HOVER_P1;
+    p.setPen(QPen(hoverColor, 3.5, Qt::SolidLine, Qt::RoundCap));
+
+    if (m_hoverIsHorizontal)
+        p.drawLine(dotPosition(m_hoverRow, m_hoverCol),
+                   dotPosition(m_hoverRow, m_hoverCol + 1));
+    else
+        p.drawLine(dotPosition(m_hoverRow,     m_hoverCol),
+                   dotPosition(m_hoverRow + 1, m_hoverCol));
+}
+
+void DotsAndBoxesWidget::drawDots(QPainter& p) const
+{
+    if (!m_game) return;
+    const int N = m_game->boardSize();
+
+    p.setPen(Qt::NoPen);
+    p.setBrush(DOT_COLOR);
+    for (int r = 0; r < N; ++r)
+        for (int c = 0; c < N; ++c)
+            p.drawEllipse(dotPosition(r, c), 5, 5);
+}
+
+void DotsAndBoxesWidget::drawScoreBar(QPainter& p) const
+{
+    if (!m_game) return;
+    const QVariantMap state = m_game->getBoardState().toMap();
+    const int s0 = state.value("score0").toInt();
+    const int s1 = state.value("score1").toInt();
+
+    // نوار بالای صفحه — بالای تخته
+    const int topBarH = 36;
+    QRect topBar(0, 0, width(), topBarH);
+    p.fillRect(topBar, BG_STATUS);
+    p.setPen(QPen(QColor(0x31, 0x32, 0x44), 1));
+    p.drawLine(0, topBarH, width(), topBarH);
+
+    QFont f = p.font();
+    f.setPointSize(10);
+    f.setBold(true);
+    p.setFont(f);
+
+    // بازیکن ۰ (آبی) — چپ
+    p.setPen(P0_COLOR);
+    p.drawText(QRect(30, 0, 200, topBarH), Qt::AlignVCenter | Qt::AlignLeft,
+               QString("● بازیکن ۱   %1 جعبه").arg(s0));
+
+    // بازیکن ۱ (قرمز) — راست
+    p.setPen(P1_COLOR);
+    p.drawText(QRect(width() - 230, 0, 200, topBarH), Qt::AlignVCenter | Qt::AlignRight,
+               QString("● بازیکن ۲   %1 جعبه").arg(s1));
+}
+
+void DotsAndBoxesWidget::drawStatusText(QPainter& p) const
+{
+    if (!m_game) return;
+
+    QString text;
+    QColor  color = TEXT_MAIN;
+
+    if (m_game->isGameOver()) {
+        const int w = m_game->getWinner();
+        if (w == -1) {
+            text  = "🤝  مساوی!";
+        } else if (w == m_myPlayer || m_myPlayer == -1) {
+            text  = (m_myPlayer == -1)
+            ? QString("🎉  بازیکن %1 برد!").arg(w + 1)
+            : "🎉  شما بردید!";
+            color = QColor(0xa6, 0xe3, 0xa1);
+        } else {
+            text  = "😔  حریف برد.";
+            color = P1_COLOR;
+        }
+    } else if (isMyTurn()) {
+        text  = "✨  نوبت شماست — روی یک خط کلیک کنید.";
+        color = P0_COLOR;
+    } else {
+        text  = "⏳  در انتظار حرکت حریف...";
+        color = TEXT_DIM;
+    }
+
+    const QRect statusRect(0, height() - 46, width(), 46);
+    p.fillRect(statusRect, BG_STATUS);
+    p.setPen(QPen(QColor(0x31, 0x32, 0x44), 1));
+    p.drawLine(0, height() - 46, width(), height() - 46);
+
+    p.setPen(color);
+    QFont f = p.font();
+    f.setPointSize(11);
+    f.setBold(isMyTurn());
+    p.setFont(f);
+    p.drawText(statusRect, Qt::AlignCenter, text);
 }
 
 void DotsAndBoxesWidget::paintEvent(QPaintEvent* event)
-=======
-void DotsAndBoxesWidget::paintEvent(QPaintEvent *event)
->>>>>>> 60a91530bac12adf7d18b37c7237ef6391ae8288
 {
-    Q_UNUSED(event);
+    Q_UNUSED(event)
     if (!m_game) return;
 
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
+    QPainter p(this);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setRenderHint(QPainter::TextAntialiasing);
 
-<<<<<<< HEAD
-    QVariantMap state = m_game->getBoardState().toMap();
-    int pRows = state["pointRows"].toInt();
-    int pCols = state["pointCols"].toInt();
-    int bRows = pRows - 1;
-    int bCols = pCols - 1;
-
-    QVariantList hLines = state["hLines"].toList();
-    QVariantList vLines = state["vLines"].toList();
-    QVariantList boxes  = state["boxes"].toList();
-
-    double margin = 50.0;
-    double boardW = width() - 2 * margin;
-    double boardH = height() - 2 * margin;
-
-    if (boardW <= 0 || boardH <= 0) return;
-
-    double cellW = boardW / (pCols - 1);
-    double cellH = boardH / (pRows - 1);
-
-    // رنگ‌بندی دو بازیکن
-    QColor p1Color(41, 128, 185); // آبی
-    QColor p2Color(231, 76, 60);  // قرمز
-    QColor neutralColor(127, 140, 141);
-
-    // ── ۱. رسم مربع‌های تکمیل‌شده و حروف اول یوزرنیم ──────────────────────
-    QString p1Initial = m_player1Name.isEmpty() ? "1" : QString(m_player1Name.at(0)).toUpper();
-    QString p2Initial = m_player2Name.isEmpty() ? "2" : QString(m_player2Name.at(0)).toUpper();
-
-    QFont font("Segoe UI", qMin(cellW, cellH) * 0.45, QFont::Bold);
-    painter.setFont(font);
-
-    for (int r = 0; r < bRows; ++r) {
-        QVariantList rowList = boxes[r].toList();
-        for (int c = 0; c < bCols; ++c) {
-            int owner = rowList[c].toInt();
-            if (owner != -1) {
-                QRectF boxRect(margin + c * cellW, margin + r * cellH, cellW, cellH);
-
-                QColor fillColor = (owner == 0) ? p1Color : p2Color;
-                fillColor.setAlpha(45); // پس‌زمینه شفاف
-                painter.fillRect(boxRect, fillColor);
-
-                painter.setPen((owner == 0) ? p1Color : p2Color);
-                QString initial = (owner == 0) ? p1Initial : p2Initial;
-                painter.drawText(boxRect, Qt::AlignCenter, initial);
-=======
-    int rows = m_game->getRows();
-    int cols = m_game->getCols();
-
-    for (int r = 0; r < rows; ++r) {
-        for (int c = 0; c < cols; ++c) {
-            int owner = m_game->boxOwner(r, c);
-            if (owner != -1) {
-                QRect rect(m_margin + c * m_cellSize, m_margin + r * m_cellSize, m_cellSize, m_cellSize);
-                if (owner == 0)
-                    painter.fillRect(rect, QColor(100, 150, 255, 150));
-                else
-                    painter.fillRect(rect, QColor(255, 100, 100, 150));
->>>>>>> 60a91530bac12adf7d18b37c7237ef6391ae8288
-            }
-        }
-    }
-
-<<<<<<< HEAD
-    // ── ۲. رسم خط Hover (هایلایت پیش‌نمایش کلیک) ───────────────────────────
-    if (m_hoveredLine.valid && isMyTurn() && !m_game->isGameOver()) {
-        int currPlayer = m_game->currentPlayer();
-        QColor hoverColor = (currPlayer == 0) ? p1Color : p2Color;
-        hoverColor.setAlpha(120);
-
-        QPen hoverPen(hoverColor, 5, Qt::DashLine, Qt::RoundCap);
-        painter.setPen(hoverPen);
-
-        if (m_hoveredLine.type == "h") {
-            double x1 = margin + m_hoveredLine.col * cellW;
-            double x2 = margin + (m_hoveredLine.col + 1) * cellW;
-            double y  = margin + m_hoveredLine.row * cellH;
-            painter.drawLine(QPointF(x1, y), QPointF(x2, y));
-        } else if (m_hoveredLine.type == "v") {
-            double x  = margin + m_hoveredLine.col * cellW;
-            double y1 = margin + m_hoveredLine.row * cellH;
-            double y2 = margin + (m_hoveredLine.row + 1) * cellH;
-            painter.drawLine(QPointF(x, y1), QPointF(x, y2));
-        }
-    }
-
-    // ── ۳. رسم خطوط افقی ثبت‌شده ──────────────────────────────────────────
-    QPen linePen(QColor(44, 62, 80), 5, Qt::SolidLine, Qt::RoundCap);
-    painter.setPen(linePen);
-
-    for (int r = 0; r < pRows; ++r) {
-        QVariantList rowList = hLines[r].toList();
-        for (int c = 0; c < pCols - 1; ++c) {
-            if (rowList[c].toBool()) {
-                double x1 = margin + c * cellW;
-                double x2 = margin + (c + 1) * cellW;
-                double y  = margin + r * cellH;
-            painter.drawLine(QPointF(x1, y), QPointF(x2, y));
-=======
-    painter.setPen(QPen(Qt::black, m_lineThickness, Qt::SolidLine, Qt::RoundCap));
-    for (int r = 0; r <= rows; ++r) {
-        for (int c = 0; c < cols; ++c) {
-            if (m_game->hasHLine(r, c)) {
-                int x = m_margin + c * m_cellSize;
-                int y = m_margin + r * m_cellSize;
-                painter.drawLine(x, y, x + m_cellSize, y);
->>>>>>> 60a91530bac12adf7d18b37c7237ef6391ae8288
-            }
-        }
-    }
-
-<<<<<<< HEAD
-    // ── ۴. رسم خطوط عمودی ثبت‌شده ──────────────────────────────────────────
-    for (int r = 0; r < pRows - 1; ++r) {
-        QVariantList rowList = vLines[r].toList();
-        for (int c = 0; c < pCols; ++c) {
-            if (rowList[c].toBool()) {
-                double x  = margin + c * cellW;
-                double y1 = margin + r * cellH;
-                double y2 = margin + (r + 1) * cellH;
-                painter.drawLine(QPointF(x, y1), QPointF(x, y2));
-=======
-    for (int r = 0; r < rows; ++r) {
-        for (int c = 0; c <= cols; ++c) {
-            if (m_game->hasVLine(r, c)) {
-                int x = m_margin + c * m_cellSize;
-                int y = m_margin + r * m_cellSize;
-                painter.drawLine(x, y, x, y + m_cellSize);
->>>>>>> 60a91530bac12adf7d18b37c7237ef6391ae8288
-            }
-        }
-    }
-
-<<<<<<< HEAD
-    // ── ۵. رسم نقاط شبکه (Dots) ───────────────────────────────────────────
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(QColor(44, 62, 80)); // رنگ نقاط
-    double dotRadius = 6.0;
-
-    for (int r = 0; r < pRows; ++r) {
-        for (int c = 0; c < pCols; ++c) {
-            double x = margin + c * cellW;
-            double y = margin + r * cellH;
-            painter.drawEllipse(QPointF(x, y), dotRadius, dotRadius);
-        }
-    }
+    drawBackground(p);
+    drawBoxes(p);
+    drawLines(p);
+    drawHover(p);
+    drawDots(p);
+    drawScoreBar(p);
+    drawStatusText(p);
 }
-=======
-    painter.setBrush(Qt::black);
-    painter.setPen(Qt::NoPen);
-    for (int r = 0; r <= rows; ++r) {
-        for (int c = 0; c <= cols; ++c) {
-            painter.drawEllipse(QPoint(m_margin + c * m_cellSize, m_margin + r * m_cellSize), m_dotRadius, m_dotRadius);
-        }
-    }
-}
-
-void DotsAndBoxesWidget::mousePressEvent(QMouseEvent *event)
-{
-    if (!m_game || m_game->isGameOver()) return;
-
-    int effectivePlayer = (m_myPlayer == -1) ? m_game->currentPlayer() : m_myPlayer;
-
-    if (effectivePlayer != m_game->currentPlayer()) return;
-
-    QPoint pos = event->pos();
-    int rows = m_game->getRows();
-    int cols = m_game->getCols();
-
-    for (int r = 0; r <= rows; ++r) {
-        for (int c = 0; c < cols; ++c) {
-            if (m_game->hasHLine(r, c)) continue;
-
-            int x = m_margin + c * m_cellSize;
-            int y = m_margin + r * m_cellSize;
-            QRect hitBox(x + m_dotRadius, y - m_hitRadius, m_cellSize - 2 * m_dotRadius, 2 * m_hitRadius);
-
-            if (hitBox.contains(pos)) {
-                QVariantMap move;
-                move["type"] = "H";
-                move["row"] = r;
-                move["col"] = c;
-
-                if (m_game->makeMove(effectivePlayer, move)) {
-                    emit moveReadyToSend(move);
-                }
-                return;
-            }
-        }
-    }
-
-    for (int r = 0; r < rows; ++r) {
-        for (int c = 0; c <= cols; ++c) {
-            if (m_game->hasVLine(r, c)) continue;
-
-            int x = m_margin + c * m_cellSize;
-            int y = m_margin + r * m_cellSize;
-            QRect hitBox(x - m_hitRadius, y + m_dotRadius, 2 * m_hitRadius, m_cellSize - 2 * m_dotRadius);
-
-            if (hitBox.contains(pos)) {
-                QVariantMap move;
-                move["type"] = "V";
-                move["row"] = r;
-                move["col"] = c;
-
-                if (m_game->makeMove(effectivePlayer, move)) {
-                    emit moveReadyToSend(move);
-                }
-                return;
-            }
-        }
-    }
-}
->>>>>>> 60a91530bac12adf7d18b37c7237ef6391ae8288
