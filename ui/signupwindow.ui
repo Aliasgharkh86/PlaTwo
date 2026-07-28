@@ -60,7 +60,6 @@ QPushButton#loginBtn:hover {
 }
    </string>
   </property>
-<<<<<<< HEAD
   <widget class="QWidget" name="centralWidget">
    <property name="geometry">
     <rect>
@@ -170,7 +169,6 @@ QPushButton#loginBtn:hover {
     </item>
    </layout>
   </widget>
-=======
   <layout class="QVBoxLayout" name="mainLayout">
    <property name="leftMargin"><number>40</number></property>
    <property name="topMargin"><number>20</number></property>
@@ -215,6 +213,5 @@ QPushButton#loginBtn:hover {
     </widget>
    </item>
   </layout>
->>>>>>> feature/game-server
  </widget>
 </ui>

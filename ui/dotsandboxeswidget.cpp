@@ -174,8 +174,18 @@ void DotsAndBoxesWidget::mousePressEvent(QMouseEvent* event)
     move["row"]          = m_hoverRow;
     move["col"]          = m_hoverCol;
 
-    if (m_game->makeMove(effectivePlayer, move))
+    // ← قبل از makeMove، نوبت فعلی رو نگه بدار
+    const int prevPlayer = m_game->currentPlayer();
+
+    if (m_game->makeMove(effectivePlayer, move)) {
+        // اگه بازی تموم نشده و نوبت عوض نشد → جعبه گرفته شده
+        // → سرور نباید نوبت رو عوض کنه
+        if (!m_game->isGameOver() &&
+            m_game->currentPlayer() == prevPlayer) {
+            move["keepTurn"] = true;  // ← اضافه کن
+        }
         emit moveReadyToSend(move);
+    }
 
     m_hoverRow = -1;
     update();

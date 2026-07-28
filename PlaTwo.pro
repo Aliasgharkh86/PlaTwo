@@ -57,6 +57,7 @@ FORMS += \
     ui/editprofilewindow.ui \
     ui/gamelobbywindow.ui \
     ui/loginwindow.ui \
+    ui/signupwindow.ui \
     ui/mainmenuwindow.ui \
     ui/recoverywindow.ui
 

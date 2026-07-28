@@ -36,6 +36,8 @@ private slots:
     void onOpponentDisconnected();
     void onGameOver(const QString& winner, const QString& reason);
 
+    // void onGameEndedLocally(int winnerPlayer);   // ← اضافه کن
+
 private:
     Game*        m_game;
     QWidget*     m_boardWidget;
@@ -45,6 +47,7 @@ private:
     User    m_currentUser;
     QString m_gameTypeStr;
     QString m_opponentUsername;
+    // bool m_recordSaved;   // ← اضافه کن
 };
 
 #endif // GAMEBOARDWINDOW_H

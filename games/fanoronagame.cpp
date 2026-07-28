@@ -18,6 +18,7 @@ FanoronaGame::FanoronaGame(QObject* parent)
 
 void FanoronaGame::resetGame()
 {
+
     for (int i = 0; i < CELLS; ++i)
         m_board[i] = 0;
 
@@ -147,7 +148,7 @@ bool FanoronaGame::hasAnyCaptureAvailable(int player) const
                 continue;
             for (const auto& d : dirs) {
                 if (!isValidDirection(row, col, d[0], d[1]))
-                    continue;
+                continue;
                 const int toRow = row + d[0], toCol = col + d[1];
                 if (!inBounds(toRow, toCol))
                     continue;

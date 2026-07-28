@@ -1,24 +1,15 @@
-#ifndef FANORONAWIDGET_H
-#define FANORONAWIDGET_H
+#ifndef FANORONAGAMEWIDGET_H
+#define FANORONAGAMEWIDGET_H
 
 #include <QWidget>
-#include "../games/fanoronagame.h"
+#include <QString>
+#include "games/fanoronagame.h"
 
 class QPushButton;
-
-// ─────────────────────────────────────────────
-// ویجت رسم و کنترل تخته‌ی Fanorona (۵×۹).
-//
-// مثل NineMensMorrisWidget، فقط View و ورودیه —
-// منطق واقعی توی FanoronaGame::makeMove انجام می‌شه.
-//
-// دو تا نکته‌ی خاص Fanorona که این کلاس باید مدیریت کنه:
-//   ۱) وقتی هم approach هم withdrawal ممکنه، باید از
-//      کاربر بپرسیم کدوم رو می‌خواد (QMessageBox)
-//   ۲) وقتی وسط یه زنجیره‌ی capture‌ایم، یه دکمه‌ی
-//      "پایان نوبت" نشون داده می‌شه تا بشه داوطلبانه
-//      زنجیره رو تموم کرد
-// ─────────────────────────────────────────────
+class QPainter;
+class QMouseEvent;
+class QResizeEvent;
+class QPaintEvent;
 
 class FanoronaWidget : public QWidget
 {
@@ -26,9 +17,8 @@ class FanoronaWidget : public QWidget
 
 public:
     explicit FanoronaWidget(QWidget* parent = nullptr);
-    explicit FanoronaWidget(FanoronaGame* game, int myPlayer, QWidget* parent = nullptr);
+    FanoronaWidget(FanoronaGame* game, int myPlayer, QWidget* parent = nullptr);
 
-    // برای زمانی که widget با Promote to توی Designer ساخته شده
     void setGame(FanoronaGame* game, int myPlayer);
 
 protected:
@@ -42,33 +32,30 @@ private slots:
     void onEndTurnClicked();
 
 private:
-    static constexpr int ROWS = 5;
-    static constexpr int COLS = 9;
+    static const int ROWS = 5;
+    static const int COLS = 9;
 
     FanoronaGame* m_game;
-    int  m_myPlayer;
-    int  m_selectedPoint;
+    int m_myPlayer;
+    int m_selectedPoint;
+
     QPushButton* m_endTurnBtn;
-    QString m_feedbackMessage; // پیام کوتاه وقتی یه حرکت رد می‌شه (مثلاً چون capture اجباریه)
+    QString m_feedbackMessage;
 
-    // ── هندسه‌ی تخته ──
-    QPoint pointPosition(int index) const;
-    int    pointAt(const QPoint& pos) const;
-
-    // ── رسم ──
-    void drawBoardLines(class QPainter& p) const;
-    void drawPoints(class QPainter& p) const;
-    void drawPieces(class QPainter& p) const;
-    void drawStatusText(class QPainter& p) const;
-
-    bool isMyTurn() const;
-    void attemptMove(int from, int to);
     void updateEndTurnButtonVisibility();
+    bool isMyTurn() const;
+    QPoint pointPosition(int index) const;
+    int pointAt(const QPoint& pos) const;
+    void attemptMove(int from, int to);
 
-    void drawBackground(QPainter& p) const;
-    void drawPieceCount(QPainter& p) const;
+    void drawBoardLines(QPainter& p) const;
+    void drawPoints(QPainter& p) const;
+    void drawPieces(QPainter& p) const;
+    void drawStatusText(QPainter& p) const;
+
+
 signals:
-    void moveReadyToSend(const QVariantMap& moveData);
+    void moveReadyToSend(const QVariantMap& moveData); // 👈 این خط باید اضافه شود
 };
 
-#endif // FANORONAWIDGET_H
+#endif // FANORONAGAMEWIDGET_H

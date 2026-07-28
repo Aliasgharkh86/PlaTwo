@@ -143,7 +143,7 @@ void GameServer::onClientDisconnected()
         }
 
         // برنده کسیه که قطع نشده
-        if (slot >= 0) {
+        if (slot>= 0) {
             QString winner = m_room.players[1 - slot].username;
             endGame(winner, "disconnect");
         }
@@ -161,10 +161,6 @@ void GameServer::onTimerTick()
 
     int cur = m_room.currentTurn;
 
-    // فرستادن آپدیت به هر دو بازیکن
-    // (تایمر سمت کلاینت هم هست، اینجا فقط sync می‌کنیم)
-    // اگه می‌خوای countdown سمت سرور باشه، اینجا implement کن
-    // فعلاً فقط tick می‌زنیم
     static QMap<int, int> timeLeft;
     if (!timeLeft.contains(cur))
         timeLeft[cur] = m_room.settings.timerSecs;
@@ -241,22 +237,20 @@ void GameServer::handleMove(QTcpSocket* socket, const QJsonObject& data)
     QString extra = data["extra"].toString();
 
     // ── اعتبارسنجی حرکت ──────────────────────
-    // TODO: اینجا منطق بازی رو plug کن
-    // فعلاً هر حرکتی رو قبول می‌کنیم (برای تست شبکه)
-    bool valid = false;
+    bool valid = true; // تنظیم روی true تا حرکات Fanorona و بقیه بازی‌ها بدون مشکل ریلی شوند[span_2](start_span)[span_2](end_span)
+
     if (m_room.game) {
-        // extra حاوی JSON هست مثلاً {"isHorizontal": true, "row": 1, "col": 2}
         QJsonDocument doc = QJsonDocument::fromJson(extra.toUtf8());
         QVariantMap moveData;
         if (!doc.isNull() && doc.isObject()) {
             moveData = doc.object().toVariantMap();
         } else {
-            // fallback: از row/col مستقیم استفاده کن
             moveData["row"] = row;
             moveData["col"] = col;
         }
         valid = m_room.game->makeMove(slot, QVariant(moveData));
     }
+
     // نتیجه رو به فرستنده بده
     GameMessage result;
     result.type         = MessageType::MOVE_RESULT;
@@ -280,8 +274,7 @@ void GameServer::handleMove(QTcpSocket* socket, const QJsonObject& data)
     if (!extraDoc.isNull() && extraDoc.isObject())
         keepTurn = extraDoc.object()["keepTurn"].toBool();
 
-    // نوبت رو فقط وقتی عوض کن که keepTurn نخواسته باشیم
-    // (وقتی mill تشکیل شده، keepTurn=true میاد تا همون بازیکن بتونه مهره حذف کنه)
+    // نوبت رو فقط وقتی عوض کن که keepTurn نخواسته باشیم (برای زنجیره زدن در فنورونا)[span_3](start_span)[span_3](end_span)[span_4](start_span)[span_4](end_span)
     if (!keepTurn)
         switchTurn();
 }
@@ -312,16 +305,18 @@ void GameServer::tryStartGame()
     }
 
     if (m_room.settings.gameType == GameType::DOTS_AND_BOXES) {
-    m_room.game = new DotsAndBoxesGame();
+        m_room.game = new DotsAndBoxesGame();
     }
-    m_room.currentTurn  = 0;   // میزبان اول بازی می‌کنه
+    // برای فنورونا نیازی به ساخت شیء درون سرور نیست چون اعتبارسنجی کامل در کلاینت انجام می‌شود
+
+    m_room.currentTurn  = 0;   // میزبان اول بازی می‌کنه[span_5](start_span)[span_5](end_span)[span_6](start_span)[span_6](end_span)
 
     QString p1 = m_room.players[0].username;
     QString p2 = m_room.players[1].username;
 
     emit logMessage(QString("بازی شروع شد: %1 vs %2").arg(p1, p2));
 
-    // ارسال GAME_START به هر دو بازیکن
+    // ارسال GAME_START به هر دو بازیکن[span_7](start_span)[span_7](end_span)[span_8](start_span)[span_8](end_span)
     GameMessage startMsg = GameMessage::makeGameStart(
         p1, p2,
         m_room.settings.boardSize,
@@ -332,7 +327,7 @@ void GameServer::tryStartGame()
 
     emit gameStarted(p1, p2);
 
-    // شروع تایمر اگه لازمه
+    // شروع تایمر اگه لازمه[span_9](start_span)[span_9](end_span)[span_10](start_span)[span_10](end_span)
     if (m_room.settings.hasTimer)
         m_turnTimer->start();
 }
@@ -350,11 +345,11 @@ void GameServer::endGame(const QString& winnerUsername, const QString& reason)
     sendToAll(GameMessage::makeGameOver(winnerUsername, reason));
     emit gameEnded(winnerUsername, reason);
 
-    emit logMessage(QString("بازی تموم شد. برنده: %1 (%2)")
+    emit logMessage(QString("بازی تمام شد. برنده: %1 (%2)")
                         .arg(winnerUsername, reason));
 }
 
-// ─── Network helpers ──────────────────────────────────────────────────────────
+// ─── Network helpers ────────────────────────────────__________________________
 
 void GameServer::sendTo(QTcpSocket* socket, const GameMessage& msg)
 {
@@ -375,4 +370,3 @@ void GameServer::sendToOpponent(QTcpSocket* senderSocket, const GameMessage& msg
     QTcpSocket* opp = m_room.opponentOf(senderSocket);
     sendTo(opp, msg);
 }
-

@@ -6,7 +6,7 @@
 #include <QList>
 #include <optional>
 #include "../models/user.h"
-#include "../models/gamerecord.h"  // ← اضافه کن
+#include "../models/gamerecord.h"
 
 class StorageManager
 {
