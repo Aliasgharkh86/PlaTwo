@@ -78,7 +78,12 @@ bool StorageManager::createUser(const User& user, QString& outError)
 
     QJsonArray arr = loadAll();
     QJsonObject obj;
-    obj["id"]       = user.id; // اضافه کردن آیدی برای سازگاری با بقیه توابع
+    // auto-increment: بزرگ‌ترین id موجود + 1
+    int maxId = 0;
+    for (const auto& v : arr)
+        maxId = qMax(maxId, v.toObject()["id"].toInt());
+    obj["id"] = maxId + 1;
+
     obj["name"]     = user.name;
     obj["username"] = user.username;
     obj["phone"]    = user.phone;
@@ -124,6 +129,7 @@ bool StorageManager::updatePassword(const QString& phone, const QString& newHash
     }
     return false;
 }
+
 QString StorageManager::getHistoryFilePath()
 {
     return QStandardPaths::writableLocation(

@@ -80,7 +80,7 @@ QPushButton#backToLoginButton:hover {
      <x>40</x>
      <y>20</y>
      <width>301</width>
-     <height>460</height>
+     <height>490</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -142,6 +142,16 @@ QPushButton#backToLoginButton:hover {
       </property>
       <property name="placeholderText">
        <string>رمز عبور (حداقل ۸ کاراکتر + عدد)</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="confirmPasswordLineEdit">
+      <property name="echoMode">
+       <enum>QLineEdit::EchoMode::Password</enum>
+      </property>
+      <property name="placeholderText">
+       <string>تکرار رمز عبور</string>
       </property>
      </widget>
     </item>
