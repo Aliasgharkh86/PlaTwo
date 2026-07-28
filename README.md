@@ -38,3 +38,6 @@ This project was developed collaboratively as the Final Project for Advanced Pro
 * **[amrhatamiii-rgb](https://github.com/amrhatamiii-rgb)**
 
 > **Note for Grading:** `Amirmehdig` and `ro-Nec` will be added as collaborators to the repository as per project requirements.
+
+# PlaTwo
+A two-player Qt/C++ game hub with Dots and Boxes, Nine Men's Morris, and Fanorona over network sockets.
